@@ -1,4 +1,5 @@
 import EditBookModal from '@/components/EditBookModal';
+import ManageBookChaptersModal from '@/components/ManageBookChaptersModal';
 import UploadBookModal from '@/components/UploadBookModal';
 import WelcomeHeader from '@/components/WelcomeHeader';
 import { Ionicons } from '@expo/vector-icons';
@@ -35,6 +36,8 @@ export default function ManageBooks() {
 
   const [isEditModalVisible, setEditModalVisible] = useState(false);
   const [editBook, setEditBook] = useState<Book | null>(null);
+
+  const [isChapterModalVisible, setChapterModalVisible] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
@@ -93,10 +96,10 @@ export default function ManageBooks() {
       let validUrl = url;
 
       if (
-        (url.includes('index.php/s/') && !url.endsWith('/download')) ||
+        (url.includes('index.php/s/') && !url.endsWith('/view')) ||
         url.includes('cloud.ptgn.in')
       ) {
-        validUrl = `${url}/download`;
+        validUrl = `${url}/view`;
       }
 
       await WebBrowser.openBrowserAsync(validUrl);
@@ -130,9 +133,13 @@ export default function ManageBooks() {
         >
           <Ionicons name="create-outline" size={22} color="#facc15" />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.actionBtn}>
+        <TouchableOpacity
+          style={styles.actionBtn}
+          onPress={() => setChapterModalVisible(true)}
+        >
           <Ionicons name="book" size={22} color="#facc15" />
         </TouchableOpacity>
+
         <TouchableOpacity style={styles.actionBtn}>
           <Ionicons name="trash-outline" size={22} color="#f87171" />
         </TouchableOpacity>
@@ -248,7 +255,6 @@ export default function ManageBooks() {
       )}
 
       {/* 📘 Upload Modal */}
-
       <UploadBookModal
         isVisible={isModalVisible}
         onClose={() => setModalVisible(false)}
@@ -264,9 +270,15 @@ export default function ManageBooks() {
         setEditBook={setEditBook}
         onClose={() => setEditModalVisible(false)}
         onUpdate={(updatedBook) => {
-          console.log('Updated book:', updatedBook);
           setEditModalVisible(false);
         }}
+      />
+
+      {/* book open model here */}
+
+      <ManageBookChaptersModal
+        isVisible={isChapterModalVisible}
+        onClose={() => setChapterModalVisible(false)}
       />
     </View>
   );
