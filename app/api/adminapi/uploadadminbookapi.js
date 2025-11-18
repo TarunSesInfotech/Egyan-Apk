@@ -1,14 +1,36 @@
 // upload book by admin api
-export const adminBookuploadapi = async (formData) => {
+export const adminBookuploadapi = async (formData, token) => {
+  try {
+    if (!token) throw new Error('Access token missing!');
+
+    const res = await fetch(`https://e-gyan-9tky.onrender.com/books/upload`, {
+      method: 'POST',
+      body: formData,
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.message || 'Upload failed');
+    return { success: true, result };
+  } catch (error) {
+    console.error('Error uploading book:', error);
+    throw error;
+  }
+};
+
+// admin get chapter api
+
+export const getChapterApi = async (bookId) => {
   try {
     const response = await fetch(
-      'https://e-gyan-9tky.onrender.com/books/upload',
+      `https://e-gyan-9tky.onrender.com/books/${bookId}/chapters`,
       {
-        method: 'POST',
+        method: 'GET',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: formData,
       }
     );
     if (!response.ok) {
@@ -17,10 +39,12 @@ export const adminBookuploadapi = async (formData) => {
     const data = await response.json();
     return { success: true, data };
   } catch (error) {
-    console.error('Error fetching upload book:', error.message);
+    console.error('Error fetching chapters:', error.message);
     return { success: false, message: error.message };
   }
 };
+
+//
 
 // https://e-gyan-9tky.onrender.com/books/324
 // Request Method

@@ -1,5 +1,7 @@
+import { CurrentAffairs } from '@/components/CurrentAffairs';
 import { SchoolEducation } from '@/components/SchoolEducation';
-import { FontAwesome5, Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Simulation } from '@/components/Simulation';
+import { FontAwesome5 } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import {
   ScrollView,
@@ -8,6 +10,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { repositoryOverview } from '../api/adminapi/adminDashboard';
 import { studentStudyMaterialApi } from '../api/studentapi/studyMaterialApi';
 
 export default function StudyMaterial() {
@@ -19,21 +22,10 @@ export default function StudyMaterial() {
     'School Education': (
       <FontAwesome5 name="book-reader" size={40} color="#43FF9B" />
     ),
-    'Higher Education': <Ionicons name="school" size={42} color="#4DA6FF" />,
-    'Competitive Exams': (
-      <MaterialIcons name="emoji-events" size={42} color="#FFB800" />
+    'Current Affairs': (
+      <FontAwesome5 name="newspaper" size={40} color="#43FF9B" />
     ),
-    'Skill Development': (
-      <FontAwesome5 name="laptop-code" size={38} color="#FF5C8A" />
-    ),
-    'Language Learning': <Ionicons name="language" size={40} color="#00CED1" />,
-    'Professional Courses': (
-      <MaterialIcons name="work" size={42} color="#8A2BE2" />
-    ),
-    'Research Material': (
-      <FontAwesome5 name="microscope" size={38} color="#FF6347" />
-    ),
-    'General Knowledge': <Ionicons name="earth" size={42} color="#32CD32" />,
+    Simulation: <FontAwesome5 name="tools" size={40} color="#43FF9B" />,
   };
 
   const fetchStudyMaterial = async () => {
@@ -41,19 +33,6 @@ export default function StudyMaterial() {
       const response = await studentStudyMaterialApi();
       if (response.success) {
         setStudyMaterialData(response.data);
-        const uniqueCategories = Array.from(
-          new Set(response.data.map((item: any) => item.category))
-        ) as string[];
-        const formattedCategories = uniqueCategories.map(
-          (cat: string, index: number) => ({
-            id: index + 1,
-            title: cat,
-            icon: iconMapping[cat] || (
-              <FontAwesome5 name="book" size={40} color="#aaa" />
-            ),
-          })
-        );
-        setCategories(formattedCategories);
       } else {
         console.error('Error fetching study-material:', response.message);
       }
@@ -62,9 +41,43 @@ export default function StudyMaterial() {
     }
   };
 
+  const fetchRepositoryApi = async () => {
+    try {
+      const response = await repositoryOverview();
+      if (response.success) {
+        const repoData = response.data;
+        const repoCategories: string[] = [
+          ...new Set(
+            repoData.flatMap((item: any) =>
+              typeof item.Categories === 'string'
+                ? item.Categories.split(',').map((cat: string) => cat.trim())
+                : []
+            ) as string[]
+          ),
+        ];
+
+        const formattedCategories = repoCategories.map(
+          (cat: string, index: number) => ({
+            id: index + 1,
+            title: cat,
+            icon: iconMapping[cat] || (
+              <FontAwesome5 name="book" size={40} color="#aaa" />
+            ),
+          })
+        );
+
+        setCategories(formattedCategories);
+      }
+    } catch (error: any) {
+      console.error('Error fetching repository:', error.message);
+    }
+  };
+
   useEffect(() => {
     fetchStudyMaterial();
+    fetchRepositoryApi();
   }, []);
+
   return (
     <View style={styles.container}>
       {selectedCategory === 'School Education' ? (
@@ -72,6 +85,10 @@ export default function StudyMaterial() {
           data={studyMaterialData}
           onBack={() => setSelectedCategory(null)}
         />
+      ) : selectedCategory === 'Simulation' ? (
+        <Simulation onBack={() => setSelectedCategory(null)} />
+      ) : selectedCategory === 'Current Affairs' ? (
+        <CurrentAffairs onBack={() => setSelectedCategory(null)} />
       ) : (
         <ScrollView style={styles.mainContent}>
           <Text style={styles.welcomeText}>Hi, Welcome Mr. Student</Text>
@@ -85,6 +102,12 @@ export default function StudyMaterial() {
                 onPress={() => {
                   if (cat.title === 'School Education') {
                     setSelectedCategory('School Education');
+                  }
+                  if (cat.title === 'Current Affairs') {
+                    setSelectedCategory('Current Affairs');
+                  }
+                  if (cat.title === 'Simulation') {
+                    setSelectedCategory('Simulation');
                   }
                 }}
               >

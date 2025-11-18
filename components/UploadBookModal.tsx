@@ -9,7 +9,7 @@ import {
   View,
 } from 'react-native';
 
-import * as DocumentPicker from 'expo-document-picker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Dropdown } from 'react-native-element-dropdown';
 import Modal from 'react-native-modal';
 import { adminBookuploadapi } from '../app/api/adminapi/uploadadminbookapi';
@@ -21,6 +21,7 @@ interface UploadBookModalProps {
 
   selectedClass: string | null;
   setSelectedClass: (value: string | null) => void;
+  onUploadSuccess: () => void;
 }
 
 export default function UploadBookModal({
@@ -29,6 +30,7 @@ export default function UploadBookModal({
   studyMaterialData,
   selectedClass,
   setSelectedClass,
+  onUploadSuccess,
 }: UploadBookModalProps) {
   const [selectedCategory, setSelectedCategory] = React.useState<string | null>(
     null
@@ -40,80 +42,47 @@ export default function UploadBookModal({
   const [bookName, setBookName] = React.useState('');
   const [subject, setSubject] = React.useState('');
 
-  const [thumbnail, setThumbnail] = React.useState<{
-    uri: string;
-    name?: string;
-    mimeType?: string;
-  } | null>(null);
-  const [bookFile, setBookFile] =
-    React.useState<DocumentPicker.DocumentPickerAsset | null>(null);
-
-  // PICK THUMBNAIL
-  const pickThumbnail = async () => {
-    const result = await DocumentPicker.getDocumentAsync({
-      type: ['image/*'],
-    });
-    if (result.canceled) return;
-    setThumbnail(result.assets[0]);
-  };
-
-  // PICK PDF
-  const pickBookFile = async () => {
-    const result = await DocumentPicker.getDocumentAsync({
-      type: 'application/pdf',
-    });
-    if (result.canceled) return;
-    setBookFile(result.assets[0]);
-  };
-
-  // VALIDATION + SUBMIT HANDLER
   const handleUpload = async () => {
-    const missingFields = [];
+    const missingFields: string[] = [];
 
     if (!bookName) missingFields.push('Book Name');
     if (!selectedCategory) missingFields.push('Category');
     if (!subject) missingFields.push('Subject');
     if (!selectedClass) missingFields.push('Education Level');
     if (!selectedLanguage) missingFields.push('Language');
-    if (!thumbnail) missingFields.push('Thumbnail Image');
-    if (!bookFile) missingFields.push('Book File (PDF)');
 
     if (missingFields.length > 0) {
       Alert.alert(
         'Missing Fields',
-        'Please fill the following fields:\n\n' + missingFields.join('\n')
+        'Please fill the following:\n\n' + missingFields.join('\n')
       );
       return;
     }
 
     const formData = new FormData();
-
     formData.append('bookName', bookName);
     formData.append('category', selectedCategory || '');
-    formData.append('SchoolEducation', 'true');
     formData.append('subject', subject);
     formData.append('educationLevel', selectedClass || '');
     formData.append('language', selectedLanguage || '');
 
-    formData.append('thumbnail', {
-      uri: thumbnail?.uri || '',
-      name: thumbnail?.name || 'thumbnail.jpg',
-      type: thumbnail?.mimeType || 'image/jpeg',
-    } as any);
+    const access_token = await AsyncStorage.getItem('token');
 
-    formData.append('file', {
-      uri: bookFile?.uri || '',
-      type: 'application/pdf',
-      name: bookFile?.name || 'book.pdf',
-    } as any);
+    try {
+      const result = await adminBookuploadapi(formData, access_token);
 
-    const result = await adminBookuploadapi(formData);
-
-    if (result.success) {
-      Alert.alert('Success', 'Book uploaded successfully!');
-      onClose();
-    } else {
-      Alert.alert('Upload Failed', result.message || 'Something went wrong');
+      if (result.success) {
+        Alert.alert('Success', 'Book uploaded successfully!');
+        onUploadSuccess();
+      } else {
+        Alert.alert(
+          'Upload Failed',
+          result.result?.message || 'Something went wrong'
+        );
+      }
+    } catch (error: any) {
+      Alert.alert('Error', error.message || 'Something went wrong');
+      console.log('UPLOAD ERROR:', error);
     }
   };
 
@@ -130,7 +99,6 @@ export default function UploadBookModal({
           <Ionicons name="book-outline" size={30} color="#3b82f6" /> Upload Book
         </Text>
 
-        {/* CATEGORY */}
         <Text style={styles.label}>Category</Text>
         <Dropdown
           style={styles.dropdownInput}
@@ -224,21 +192,6 @@ export default function UploadBookModal({
               )}
             />
 
-            <Text style={styles.label}>Thumbnail Image</Text>
-            <TouchableOpacity style={styles.fileButton} onPress={pickThumbnail}>
-              <Ionicons name="image-outline" size={22} color="#fff" />
-              <Text style={styles.fileButtonText}>
-                {thumbnail ? thumbnail.name : 'Choose Image'}
-              </Text>
-            </TouchableOpacity>
-            <Text style={styles.label}>Book File (PDF)</Text>
-            <TouchableOpacity style={styles.fileButton} onPress={pickBookFile}>
-              <Ionicons name="image-outline" size={22} color="#fff" />
-              <Text style={styles.fileButtonText}>
-                {bookFile ? bookFile.name : 'Choose PDF'}
-              </Text>
-            </TouchableOpacity>
-
             <View style={styles.buttonRow}>
               <TouchableOpacity
                 style={[styles.modalBtn, { backgroundColor: '#ef4444' }]}
@@ -264,11 +217,7 @@ export default function UploadBookModal({
 }
 
 const styles = StyleSheet.create({
-  modalContent: {
-    backgroundColor: '#1e1e2d',
-    borderRadius: 12,
-    padding: 20,
-  },
+  modalContent: { backgroundColor: '#1e1e2d', borderRadius: 12, padding: 20 },
   modalTitle: {
     color: '#fff',
     fontSize: 22,
@@ -284,12 +233,7 @@ const styles = StyleSheet.create({
     fontSize: 22,
     marginTop: 20,
   },
-  label: {
-    color: '#aaa',
-    fontSize: 20,
-    marginBottom: 4,
-    marginTop: 8,
-  },
+  label: { color: '#aaa', fontSize: 20, marginBottom: 4, marginTop: 8 },
   dropdownInput: {
     height: 50,
     backgroundColor: '#2a2a3d',
@@ -297,14 +241,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 10,
   },
-  placeholderStyle: {
-    color: '#aaa',
-    fontSize: 18,
-  },
-  selectedTextStyle: {
-    color: '#fff',
-    fontSize: 18,
-  },
+  placeholderStyle: { color: '#aaa', fontSize: 18 },
+  selectedTextStyle: { color: '#fff', fontSize: 18 },
   fileButton: {
     backgroundColor: '#3b82f6',
     borderRadius: 8,
@@ -321,10 +259,7 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginLeft: 6,
   },
-  buttonRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
+  buttonRow: { flexDirection: 'row', justifyContent: 'space-between' },
   modalBtn: {
     flexDirection: 'row',
     alignItems: 'center',

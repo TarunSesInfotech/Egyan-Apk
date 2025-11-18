@@ -33,6 +33,7 @@ export default function ManageBooks() {
   const [studyMaterialData, setStudyMaterialData] = useState<Book[]>([]);
   const [filteredBooks, setFilteredBooks] = useState<Book[]>([]);
   const [isModalVisible, setModalVisible] = useState(false);
+  const [selectedBookId, setSelectedBookId] = useState<number | null>(null);
 
   const [isEditModalVisible, setEditModalVisible] = useState(false);
   const [editBook, setEditBook] = useState<Book | null>(null);
@@ -135,7 +136,10 @@ export default function ManageBooks() {
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.actionBtn}
-          onPress={() => setChapterModalVisible(true)}
+          onPress={() => {
+            setSelectedBookId(item.id);
+            setChapterModalVisible(true);
+          }}
         >
           <Ionicons name="book" size={22} color="#facc15" />
         </TouchableOpacity>
@@ -261,6 +265,10 @@ export default function ManageBooks() {
         studyMaterialData={studyMaterialData}
         selectedClass={selectedClass}
         setSelectedClass={setSelectedClass}
+        onUploadSuccess={() => {
+          setModalVisible(false);
+          setChapterModalVisible(true);
+        }}
       />
 
       {/* edit model here */}
@@ -275,11 +283,13 @@ export default function ManageBooks() {
       />
 
       {/* book open model here */}
-
-      <ManageBookChaptersModal
-        isVisible={isChapterModalVisible}
-        onClose={() => setChapterModalVisible(false)}
-      />
+      {selectedBookId && (
+        <ManageBookChaptersModal
+          isVisible={isChapterModalVisible}
+          onClose={() => setChapterModalVisible(false)}
+          bookId={selectedBookId}
+        />
+      )}
     </View>
   );
 }
