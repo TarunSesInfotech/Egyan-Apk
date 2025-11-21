@@ -3,6 +3,7 @@ import { getChapterApi } from '@/app/api/adminapi/uploadadminbookapi';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import {
+  ActivityIndicator,
   Image,
   Modal,
   ScrollView,
@@ -24,7 +25,7 @@ interface Chapter {
 interface ManageBookChaptersModalProps {
   isVisible: boolean;
   onClose: () => void;
-  bookId: string | number;
+  bookId: number;
 }
 
 export default function ManageBookChaptersModal({
@@ -35,25 +36,29 @@ export default function ManageBookChaptersModal({
   const [chapterNumber, setChapterNumber] = useState('');
   const [resourceType, setResourceType] = useState<string | null>(null);
   const [filePath, setFilePath] = useState<string | null>(null);
+  const [fileName, setFileName] = useState<string | null>(null);
   const [thumbnail, setThumbnail] = useState<string | null>(null);
+  const [thumbnailName, setThumbnailName] = useState<string | null>(null);
   const [categories, setCategories] = useState<
     { label: string; value: string }[]
   >([]);
   const [loading, setLoading] = useState(false);
-
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [fetching, setFetching] = useState(false);
 
-  // Fetch Dropdown Data
+  /* ------------------ repository types ------------------ */
   const fetchRepository = async () => {
     try {
       const response = await repositoryOverview();
-      if (response.success && Array.isArray(response.data)) {
+      if (response?.success && Array.isArray(response.data)) {
         const mergedTypes = Array.from(
           new Set(
             response.data
-              .flatMap((item: any) => item.ResourceTypes.split(','))
+              .flatMap((item: any) =>
+                (item?.ResourceTypes || '').toString().split(',')
+              )
               .map((x: string) => x.trim())
+              .filter(Boolean)
           )
         );
 
@@ -63,7 +68,7 @@ export default function ManageBookChaptersModal({
         ]);
       }
     } catch (error: any) {
-      console.error('Repository fetch error:', error.message);
+      console.error('Repository fetch error:', error?.message ?? error);
     }
   };
 
@@ -71,41 +76,40 @@ export default function ManageBookChaptersModal({
     fetchRepository();
   }, []);
 
+  /* ------------------ fetch chapters ------------------ */
   useEffect(() => {
     if (isVisible && bookId) fetchChapters();
   }, [isVisible, bookId]);
 
   const fetchChapters = async () => {
     setFetching(true);
-
-    const response = await getChapterApi(bookId);
-
-    if (response.success && Array.isArray(response.data)) {
-      setChapters(response.data);
-    } else {
-      console.error('Error fetching chapters:', response.message);
+    try {
+      const response = await getChapterApi(bookId);
+      if (response?.success && Array.isArray(response.data)) {
+        setChapters(response.data);
+      } else {
+        setChapters([]);
+      }
+    } catch (err) {
+      setChapters([]);
+    } finally {
+      setFetching(false);
     }
-    setFetching(false);
   };
 
   const getImageUrl = (url: string) => {
+    if (!url) return '';
     if (url.includes('index.php/s/') && !url.endsWith('/download')) {
       return `${url}/download`;
     }
     return url;
   };
 
-  // File Upload Handler
-  const handleFileUpload = () => {
-    alert(`Upload ${resourceType} file here`);
-    setFilePath('dummy/path/selected.file');
-  };
-
+  /* ------------------ UI ------------------ */
   return (
     <Modal visible={isVisible} animationType="slide" transparent>
       <View style={styles.modalOverlay}>
         <View style={styles.modalBox}>
-          {/* Header */}
           <View style={styles.headerRow}>
             <Text style={styles.headerText}>📚 Manage Book Chapters</Text>
             <TouchableOpacity onPress={onClose}>
@@ -113,133 +117,142 @@ export default function ManageBookChaptersModal({
             </TouchableOpacity>
           </View>
 
-          <ScrollView showsVerticalScrollIndicator={false}>
-            {/* Chapter Number */}
-            <Text style={styles.label}>Enter Chapter Number</Text>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 20 }}
+          >
+            <Text style={styles.label}>Chapter Number</Text>
             <TextInput
               placeholder="Enter Chapter Number"
               placeholderTextColor="#888"
               style={styles.input}
               value={chapterNumber}
-              onChangeText={setChapterNumber}
+              onChangeText={(text) =>
+                setChapterNumber(text.replace(/[^0-9]/g, ''))
+              }
+              keyboardType="numeric"
             />
 
-            {/* Resource Type Dropdown */}
-            <Text style={styles.label}>Select Resource Type</Text>
+            <Text style={styles.label}>Resource Type</Text>
             <View style={styles.dropdownWrapper}>
               <Dropdown
                 style={styles.dropdownInput}
                 placeholderStyle={styles.placeholderStyle}
                 selectedTextStyle={styles.selectedTextStyle}
                 data={categories}
-                maxHeight={300}
                 labelField="label"
                 valueField="value"
                 placeholder="Select Type"
                 value={resourceType}
-                onChange={(item: any) => setResourceType(item.value)}
+                onChange={(item: any) => {
+                  setResourceType(item?.value ?? null);
+                  setFilePath(null);
+                  setFileName(null);
+                }}
                 renderRightIcon={() => (
                   <Ionicons name="chevron-down" size={22} color="#aaa" />
                 )}
               />
             </View>
 
-            {/* Conditional File or Link UI */}
-            {resourceType && resourceType !== '' && (
-              <View>
-                {resourceType === 'PDF' || resourceType === 'AUDIO' ? (
-                  <>
-                    <Text style={styles.label}>Upload {resourceType} File</Text>
-                    <TouchableOpacity
-                      style={styles.uploadBtn}
-                      onPress={handleFileUpload}
-                    >
-                      <Text style={{ color: '#fff' }}>Choose File</Text>
-                    </TouchableOpacity>
-                  </>
-                ) : (
-                  <>
-                    <Text style={styles.label}>Enter Resource Link</Text>
-                    <TextInput
-                      placeholder="Paste URL Link Here"
-                      placeholderTextColor="#888"
-                      style={styles.input}
-                      value={filePath ?? ''}
-                      onChangeText={setFilePath}
-                    />
-                  </>
-                )}
-              </View>
-            )}
+            {resourceType &&
+              (resourceType === 'PDF' || resourceType === 'AUDIO' ? (
+                <>
+                  <Text style={styles.label}>Upload {resourceType} File</Text>
+                  <TouchableOpacity style={styles.uploadBtn}>
+                    <Text style={{ color: '#fff' }}>
+                      {filePath ? fileName ?? 'File Selected' : 'Choose File'}
+                    </Text>
+                  </TouchableOpacity>
+                </>
+              ) : (
+                <>
+                  <Text style={styles.label}>Enter Resource Link</Text>
+                  <TextInput
+                    placeholder="Paste URL starting with http/https"
+                    placeholderTextColor="#888"
+                    style={styles.input}
+                    value={filePath ?? ''}
+                    onChangeText={(txt) => setFilePath(txt)}
+                    autoCapitalize="none"
+                  />
+                </>
+              ))}
 
-            {/* Thumbnail Upload */}
-            <Text style={styles.label}>Thumbnail Image</Text>
+            <Text style={styles.label}>Thumbnail (optional)</Text>
             <TouchableOpacity style={styles.uploadBtn}>
-              <Text style={{ color: '#fff' }}>Choose Thumbnail</Text>
+              <Text style={{ color: '#fff' }}>
+                {thumbnail ? thumbnailName ?? 'Selected' : 'Choose Thumbnail'}
+              </Text>
             </TouchableOpacity>
 
-            {thumbnail && (
-              <Image source={{ uri: thumbnail }} style={styles.previewImg} />
-            )}
-
-            {/* Action Buttons */}
             <View style={styles.buttonRow}>
               <TouchableOpacity
                 style={[styles.modalBtn, { backgroundColor: '#ef4444' }]}
                 onPress={onClose}
               >
-                <Ionicons name="close" size={22} color="#fff" />
+                <Ionicons name="close" color="#fff" size={22} />
                 <Text style={styles.modalBtnText}>Cancel</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.modalBtn, { backgroundColor: '#22c55e' }]}
+                style={[
+                  styles.modalBtn,
+                  { backgroundColor: loading ? '#94d3a2' : '#22c55e' },
+                ]}
                 disabled={loading}
               >
-                <Ionicons name="checkmark" size={22} color="#fff" />
+                {loading ? (
+                  <ActivityIndicator
+                    size="small"
+                    color="#fff"
+                    style={{ marginRight: 8 }}
+                  />
+                ) : (
+                  <Ionicons name="checkmark" color="#fff" size={22} />
+                )}
                 <Text style={styles.modalBtnText}>
                   {loading ? 'Uploading...' : 'Upload'}
                 </Text>
               </TouchableOpacity>
             </View>
 
-            {fetching ? (
-              <Text style={{ color: '#fff', marginTop: 8 }}>
-                Loading chapters...
-              </Text>
-            ) : chapters.length === 0 ? (
-              <Text style={{ color: '#bbb', marginTop: 10 }}>
-                No chapters found.
-              </Text>
-            ) : (
-              chapters.map((chapter) => (
-                <View key={chapter.id} style={styles.chapterCard}>
-                  <Image
-                    source={{
-                      uri: getImageUrl(
-                        chapter.thumbnail ||
-                          'https://cdn-icons-png.flaticon.com/512/2232/2232688.png'
-                      ),
-                    }}
-                    style={styles.chapterImg}
-                  />
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.chapterTitle}>
-                      Chapter {chapter.chapterNumber}
-                    </Text>
-                    {chapter.parts?.map((part, index) => (
-                      <Text key={index} style={styles.partText}>
-                        • {part}
-                      </Text>
-                    ))}
-                  </View>
+            <View style={{ marginTop: 12 }}>
+              {fetching ? (
+                <Text style={{ color: '#fff' }}>Loading chapters...</Text>
+              ) : chapters.length === 0 ? (
+                <Text style={{ color: '#bbb' }}>No chapters found.</Text>
+              ) : (
+                chapters.map((chapter) => (
+                  <View key={chapter.id} style={styles.chapterCard}>
+                    <Image
+                      source={{
+                        uri: getImageUrl(
+                          chapter.thumbnail ||
+                            'https://cdn-icons-png.flaticon.com/512/2232/2232688.png'
+                        ),
+                      }}
+                      style={styles.chapterImg}
+                    />
 
-                  <TouchableOpacity style={styles.addPartBtn}>
-                    <Text style={styles.addPartText}>+ Add Part</Text>
-                  </TouchableOpacity>
-                </View>
-              ))
-            )}
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.chapterTitle}>
+                        Chapter {chapter.chapterNumber}
+                      </Text>
+                      {chapter.parts?.map((p, i) => (
+                        <Text key={i} style={styles.partText}>
+                          • {p}
+                        </Text>
+                      ))}
+                    </View>
+
+                    <TouchableOpacity style={styles.addPartBtn}>
+                      <Text style={styles.addPartText}>+ Add Part</Text>
+                    </TouchableOpacity>
+                  </View>
+                ))
+              )}
+            </View>
           </ScrollView>
         </View>
       </View>
@@ -250,7 +263,6 @@ export default function ManageBookChaptersModal({
 /* -------------------------------------------------------------- */
 /* STYLES */
 /* -------------------------------------------------------------- */
-
 const styles = StyleSheet.create({
   modalOverlay: {
     flex: 1,
@@ -268,8 +280,7 @@ const styles = StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 10,
   },
   headerText: {
     color: '#fff',
@@ -306,18 +317,10 @@ const styles = StyleSheet.create({
   },
   uploadBtn: {
     backgroundColor: '#3b82f6',
-    padding: 10,
+    padding: 12,
     borderRadius: 8,
     marginBottom: 10,
     alignItems: 'center',
-  },
-  previewImg: {
-    width: 70,
-    height: 70,
-    borderRadius: 10,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#555',
   },
   buttonRow: {
     flexDirection: 'row',
@@ -328,32 +331,48 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 8,
-    paddingVertical: 10,
     flex: 1,
+    paddingVertical: 10,
     marginHorizontal: 4,
   },
   modalBtnText: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: '600',
-    marginLeft: 4,
+    marginLeft: 5,
   },
   chapterCard: {
     flexDirection: 'row',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     backgroundColor: '#2a2a3d',
     borderRadius: 10,
     padding: 10,
     marginBottom: 8,
+    marginTop: 14,
   },
-  chapterImg: { width: 50, height: 50, borderRadius: 6, marginRight: 10 },
-  chapterTitle: { color: '#fff', fontSize: 16, fontWeight: '600' },
-  partText: { color: '#aaa', marginLeft: 10 },
+  chapterImg: {
+    width: 50,
+    height: 50,
+    borderRadius: 6,
+    marginRight: 10,
+  },
+  chapterTitle: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  partText: {
+    color: '#aaa',
+    marginLeft: 8,
+  },
   addPartBtn: {
     backgroundColor: '#22c55e',
     paddingVertical: 6,
     paddingHorizontal: 10,
     borderRadius: 8,
   },
-  addPartText: { color: '#fff', fontWeight: '600' },
+  addPartText: {
+    color: '#fff',
+    fontWeight: '600',
+  },
 });

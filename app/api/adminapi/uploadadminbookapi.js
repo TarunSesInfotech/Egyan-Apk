@@ -19,6 +19,30 @@ export const adminBookuploadapi = async (formData, token) => {
     throw error;
   }
 };
+// upload admin Chapter api
+export const adminChapteruploadapi = async (formData, token, bookId) => {
+  try {
+    if (!token) throw new Error('Access token missing!');
+
+    const res = await fetch(
+      `https://e-gyan-9tky.onrender.com/books/${bookId}/chapters`,
+      {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.message || 'Upload failed');
+    return { success: true, result };
+  } catch (error) {
+    console.error('Error uploading book:', error);
+    throw error;
+  }
+};
 
 // admin get chapter api
 

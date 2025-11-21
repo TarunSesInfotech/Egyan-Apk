@@ -3,11 +3,12 @@ import ManageBookChaptersModal from '@/components/ManageBookChaptersModal';
 import UploadBookModal from '@/components/UploadBookModal';
 import WelcomeHeader from '@/components/WelcomeHeader';
 import { Ionicons } from '@expo/vector-icons';
-import * as WebBrowser from 'expo-web-browser';
 import React, { useEffect, useState } from 'react';
+
 import {
   FlatList,
   Image,
+  Modal,
   StyleSheet,
   Text,
   TextInput,
@@ -15,7 +16,11 @@ import {
   View,
 } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
-import { studentStudyMaterialApi } from '../api/studentapi/studyMaterialApi';
+import { WebView } from 'react-native-webview';
+import {
+  StudentBookApi,
+  studentStudyMaterialApi,
+} from '../api/studentapi/studyMaterialApi';
 
 interface Book {
   category: any;
@@ -39,6 +44,9 @@ export default function ManageBooks() {
   const [editBook, setEditBook] = useState<Book | null>(null);
 
   const [isChapterModalVisible, setChapterModalVisible] = useState(false);
+
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+  const [isPdfModalVisible, setPdfModalVisible] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
@@ -80,6 +88,16 @@ export default function ManageBooks() {
     return url;
   };
 
+  const getPdfUrl = (url: string) => {
+    if (!url || typeof url !== 'string') return '';
+
+    if (url.endsWith('/download')) {
+      return url.replace('/download', '');
+    }
+
+    return url;
+  };
+
   const totalPages = Math.ceil(filteredBooks.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const currentBooks = filteredBooks.slice(
@@ -87,26 +105,47 @@ export default function ManageBooks() {
     startIndex + itemsPerPage
   );
 
-  const openPdf = async (url: string) => {
+  const handleOpenBook = async (bookId: number) => {
     try {
-      if (!url) {
-        alert('PDF not available for this book.');
+      const response = await StudentBookApi(bookId);
+
+      if (!response.success) {
+        alert('Failed to load book chapters');
         return;
       }
 
-      let validUrl = url;
+      const chapters = response.data;
 
-      if (
-        (url.includes('index.php/s/') && !url.endsWith('/view')) ||
-        url.includes('cloud.ptgn.in')
-      ) {
-        validUrl = `${url}/view`;
+      // Filter only PDF chapters
+      const pdfChapters = chapters.filter(
+        (ch: any) => ch.resourceType === 'pdf'
+      );
+
+      if (pdfChapters.length === 0) {
+        alert('No PDF chapters available');
+        return;
       }
 
-      await WebBrowser.openBrowserAsync(validUrl);
+      const pdfLink = pdfChapters[0].fileUrl;
+      // console.log('pdfLink :>> ', pdfLink);
+
+      if (!pdfLink) {
+        alert('PDF URL missing in chapter');
+        return;
+      }
+
+      const finalPdfUrl = getPdfUrl(pdfLink);
+
+      setPdfUrl(finalPdfUrl);
+      setPdfModalVisible(true);
     } catch (error) {
-      console.error('Error opening PDF:', error);
+      console.error('Error opening book:', error);
     }
+  };
+
+  const closePdfModal = () => {
+    setPdfUrl('');
+    setPdfModalVisible(false);
   };
 
   const renderBook = ({ item }: { item: Book }) => (
@@ -157,7 +196,7 @@ export default function ManageBooks() {
       />
       <TouchableOpacity
         style={styles.viewBtn}
-        onPress={() => openPdf(item.thumbnailProxyUrl)}
+        onPress={() => handleOpenBook(item.id)}
       >
         <Ionicons name="document-text-outline" size={24} color="#3b82f6" />
         <Text style={styles.viewText}>View</Text>
@@ -265,8 +304,9 @@ export default function ManageBooks() {
         studyMaterialData={studyMaterialData}
         selectedClass={selectedClass}
         setSelectedClass={setSelectedClass}
-        onUploadSuccess={() => {
+        onUploadSuccess={(bookId) => {
           setModalVisible(false);
+          setSelectedBookId(bookId);
           setChapterModalVisible(true);
         }}
       />
@@ -290,6 +330,21 @@ export default function ManageBooks() {
           bookId={selectedBookId}
         />
       )}
+
+      <Modal visible={isPdfModalVisible} animationType="slide">
+        <View style={styles.pdfHeader}>
+          <TouchableOpacity onPress={closePdfModal}>
+            <Ionicons name="close-circle" size={32} color="#333" />
+          </TouchableOpacity>
+          <Text style={styles.pdfHeaderText}>PDF Viewer</Text>
+        </View>
+
+        {pdfUrl ? (
+          <WebView source={{ uri: pdfUrl }} style={{ flex: 1 }} />
+        ) : (
+          <Text>Loading PDF...</Text>
+        )}
+      </Modal>
     </View>
   );
 }
@@ -476,4 +531,13 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 20,
   },
+  pdfHeader: {
+    padding: 15,
+    backgroundColor: '#fff',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    elevation: 4,
+  },
+  pdfHeaderText: { fontSize: 18, fontWeight: '600' },
 });

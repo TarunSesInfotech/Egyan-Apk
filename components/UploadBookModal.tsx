@@ -21,7 +21,7 @@ interface UploadBookModalProps {
 
   selectedClass: string | null;
   setSelectedClass: (value: string | null) => void;
-  onUploadSuccess: () => void;
+  onUploadSuccess: (bookId: number) => void;
 }
 
 export default function UploadBookModal({
@@ -72,8 +72,9 @@ export default function UploadBookModal({
       const result = await adminBookuploadapi(formData, access_token);
 
       if (result.success) {
+        const newBookId = result.result?.id;
         Alert.alert('Success', 'Book uploaded successfully!');
-        onUploadSuccess();
+        onUploadSuccess(newBookId);
       } else {
         Alert.alert(
           'Upload Failed',
@@ -217,7 +218,11 @@ export default function UploadBookModal({
 }
 
 const styles = StyleSheet.create({
-  modalContent: { backgroundColor: '#1e1e2d', borderRadius: 12, padding: 20 },
+  modalContent: {
+    backgroundColor: '#1e1e2d',
+    borderRadius: 12,
+    padding: 20,
+  },
   modalTitle: {
     color: '#fff',
     fontSize: 22,
@@ -233,7 +238,12 @@ const styles = StyleSheet.create({
     fontSize: 22,
     marginTop: 20,
   },
-  label: { color: '#aaa', fontSize: 20, marginBottom: 4, marginTop: 8 },
+  label: {
+    color: '#aaa',
+    fontSize: 20,
+    marginBottom: 4,
+    marginTop: 8,
+  },
   dropdownInput: {
     height: 50,
     backgroundColor: '#2a2a3d',
@@ -241,8 +251,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 10,
   },
-  placeholderStyle: { color: '#aaa', fontSize: 18 },
-  selectedTextStyle: { color: '#fff', fontSize: 18 },
+  placeholderStyle: {
+    color: '#aaa',
+    fontSize: 18,
+  },
+  selectedTextStyle: {
+    color: '#fff',
+    fontSize: 18,
+  },
   fileButton: {
     backgroundColor: '#3b82f6',
     borderRadius: 8,
@@ -259,7 +275,10 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginLeft: 6,
   },
-  buttonRow: { flexDirection: 'row', justifyContent: 'space-between' },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
   modalBtn: {
     flexDirection: 'row',
     alignItems: 'center',
