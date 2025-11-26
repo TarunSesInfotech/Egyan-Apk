@@ -19,6 +19,7 @@ export const adminBookuploadapi = async (formData, token) => {
     throw error;
   }
 };
+
 // upload admin Chapter api
 export const adminChapteruploadapi = async (formData, token, bookId) => {
   try {
@@ -45,7 +46,6 @@ export const adminChapteruploadapi = async (formData, token, bookId) => {
 };
 
 // admin get chapter api
-
 export const getChapterApi = async (bookId) => {
   try {
     const response = await fetch(
@@ -68,8 +68,25 @@ export const getChapterApi = async (bookId) => {
   }
 };
 
-//
-
-// https://e-gyan-9tky.onrender.com/books/324
-// Request Method
-// DELETE
+//admin delete api
+export const getChapterDeleteApi = async (bookId) => {
+  try {
+    const response = await fetch(
+      ` https://e-gyan-9tky.onrender.com/books/${bookId}`,
+      {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error fetching chapters:', error.message);
+    return { success: false, message: error.message };
+  }
+};

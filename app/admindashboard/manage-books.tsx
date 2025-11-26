@@ -4,8 +4,8 @@ import UploadBookModal from '@/components/UploadBookModal';
 import WelcomeHeader from '@/components/WelcomeHeader';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
-
 import {
+  Alert,
   FlatList,
   Image,
   Modal,
@@ -17,6 +17,7 @@ import {
 } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
 import { WebView } from 'react-native-webview';
+import { getChapterDeleteApi } from '../api/adminapi/uploadadminbookapi';
 import {
   StudentBookApi,
   studentStudyMaterialApi,
@@ -90,7 +91,6 @@ export default function ManageBooks() {
 
   const getPdfUrl = (url: string) => {
     if (!url || typeof url !== 'string') return '';
-
     if (url.endsWith('/download')) {
       return url.replace('/download', '');
     }
@@ -108,39 +108,65 @@ export default function ManageBooks() {
   const handleOpenBook = async (bookId: number) => {
     try {
       const response = await StudentBookApi(bookId);
-
       if (!response.success) {
         alert('Failed to load book chapters');
         return;
       }
-
       const chapters = response.data;
-
-      // Filter only PDF chapters
       const pdfChapters = chapters.filter(
         (ch: any) => ch.resourceType === 'pdf'
       );
-
       if (pdfChapters.length === 0) {
         alert('No PDF chapters available');
         return;
       }
-
       const pdfLink = pdfChapters[0].fileUrl;
-      // console.log('pdfLink :>> ', pdfLink);
-
       if (!pdfLink) {
         alert('PDF URL missing in chapter');
         return;
       }
-
       const finalPdfUrl = getPdfUrl(pdfLink);
-
       setPdfUrl(finalPdfUrl);
       setPdfModalVisible(true);
     } catch (error) {
       console.error('Error opening book:', error);
     }
+  };
+
+  const handleDeleteBook = (bookId: number) => {
+    Alert.alert(
+      'Confirm Delete',
+      'Are you sure you want to delete this book?',
+      [
+        {
+          text: 'No',
+          style: 'cancel',
+        },
+        {
+          text: 'Yes',
+          onPress: async () => {
+            try {
+              const response = await getChapterDeleteApi(bookId);
+
+              if (response.success) {
+                alert('Book deleted successfully!');
+
+                const updatedList = studyMaterialData.filter(
+                  (item) => item.id !== bookId
+                );
+                setStudyMaterialData(updatedList);
+                setFilteredBooks(updatedList);
+              } else {
+                alert('Failed to delete the book');
+              }
+            } catch (error) {
+              console.error('Delete Error:', error);
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   const closePdfModal = () => {
@@ -183,7 +209,10 @@ export default function ManageBooks() {
           <Ionicons name="book" size={22} color="#facc15" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.actionBtn}>
+        <TouchableOpacity
+          style={styles.actionBtn}
+          onPress={() => handleDeleteBook(item.id)}
+        >
           <Ionicons name="trash-outline" size={22} color="#f87171" />
         </TouchableOpacity>
       </View>
@@ -278,11 +307,9 @@ export default function ManageBooks() {
             <Ionicons name="chevron-back" size={24} color="#fff" />
             <Text style={styles.pageText}>Prev</Text>
           </TouchableOpacity>
-
           <Text style={styles.pageNumber}>
             Page {currentPage} of {totalPages}
           </Text>
-
           <TouchableOpacity
             disabled={currentPage === totalPages}
             onPress={() => setCurrentPage(currentPage + 1)}
@@ -334,11 +361,10 @@ export default function ManageBooks() {
       <Modal visible={isPdfModalVisible} animationType="slide">
         <View style={styles.pdfHeader}>
           <TouchableOpacity onPress={closePdfModal}>
-            <Ionicons name="close-circle" size={32} color="#333" />
+            <Ionicons name="close-circle" size={48} color="#333" />
           </TouchableOpacity>
           <Text style={styles.pdfHeaderText}>PDF Viewer</Text>
         </View>
-
         {pdfUrl ? (
           <WebView source={{ uri: pdfUrl }} style={{ flex: 1 }} />
         ) : (
@@ -539,5 +565,8 @@ const styles = StyleSheet.create({
     gap: 12,
     elevation: 4,
   },
-  pdfHeaderText: { fontSize: 18, fontWeight: '600' },
+  pdfHeaderText: {
+    fontSize: 24,
+    fontWeight: '600',
+  },
 });

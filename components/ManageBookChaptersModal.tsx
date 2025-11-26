@@ -1,9 +1,14 @@
-import { repositoryOverview } from '@/app/api/adminapi/adminDashboard';
+import {
+  getInnerChapterDeleteApi,
+  repositoryOverview,
+} from '@/app/api/adminapi/adminDashboard';
 import { getChapterApi } from '@/app/api/adminapi/uploadadminbookapi';
+import AddPartModal from '@/components/AddPartModal';
 import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Alert,
   Image,
   Modal,
   ScrollView,
@@ -14,20 +19,18 @@ import {
   View,
 } from 'react-native';
 import { Dropdown } from 'react-native-element-dropdown';
-
 interface Chapter {
   id: number;
   chapterNumber: number;
   parts: string[];
   thumbnail?: string;
+  resourceType?: string;
 }
-
 interface ManageBookChaptersModalProps {
   isVisible: boolean;
   onClose: () => void;
   bookId: number;
 }
-
 export default function ManageBookChaptersModal({
   isVisible,
   onClose,
@@ -45,8 +48,12 @@ export default function ManageBookChaptersModal({
   const [loading, setLoading] = useState(false);
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [fetching, setFetching] = useState(false);
+  const [partModalVisible, setPartModalVisible] = useState(false);
+  const [selectedChapterId, setSelectedChapterId] = useState<number | null>(
+    null
+  );
+  const [openChapterId, setOpenChapterId] = useState<number | null>(null);
 
-  /* ------------------ repository types ------------------ */
   const fetchRepository = async () => {
     try {
       const response = await repositoryOverview();
@@ -61,7 +68,6 @@ export default function ManageBookChaptersModal({
               .filter(Boolean)
           )
         );
-
         setCategories([
           { label: 'Select Resource Type', value: '' },
           ...mergedTypes.map((type) => ({ label: type, value: type })),
@@ -76,7 +82,6 @@ export default function ManageBookChaptersModal({
     fetchRepository();
   }, []);
 
-  /* ------------------ fetch chapters ------------------ */
   useEffect(() => {
     if (isVisible && bookId) fetchChapters();
   }, [isVisible, bookId]);
@@ -105,6 +110,36 @@ export default function ManageBookChaptersModal({
     return url;
   };
 
+  const handleDeleteBook = (bookId: number) => {
+    Alert.alert(
+      'Confirm Delete',
+      'Are you sure you want to delete this book?',
+      [
+        {
+          text: 'No',
+          style: 'cancel',
+        },
+        {
+          text: 'Yes',
+          onPress: async () => {
+            try {
+              const response = await getInnerChapterDeleteApi(bookId);
+
+              if (response.success) {
+                alert('Book deleted successfully!');
+                fetchChapters();
+              } else {
+                alert('Failed to delete the book');
+              }
+            } catch (error) {
+              console.error('Delete Error:', error);
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  };
   /* ------------------ UI ------------------ */
   return (
     <Modal visible={isVisible} animationType="slide" transparent>
@@ -116,7 +151,6 @@ export default function ManageBookChaptersModal({
               <Ionicons name="close" size={28} color="#fff" />
             </TouchableOpacity>
           </View>
-
           <ScrollView
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{ paddingBottom: 20 }}
@@ -132,7 +166,6 @@ export default function ManageBookChaptersModal({
               }
               keyboardType="numeric"
             />
-
             <Text style={styles.label}>Resource Type</Text>
             <View style={styles.dropdownWrapper}>
               <Dropdown
@@ -154,7 +187,6 @@ export default function ManageBookChaptersModal({
                 )}
               />
             </View>
-
             {resourceType &&
               (resourceType === 'PDF' || resourceType === 'AUDIO' ? (
                 <>
@@ -178,14 +210,12 @@ export default function ManageBookChaptersModal({
                   />
                 </>
               ))}
-
             <Text style={styles.label}>Thumbnail (optional)</Text>
             <TouchableOpacity style={styles.uploadBtn}>
               <Text style={{ color: '#fff' }}>
                 {thumbnail ? thumbnailName ?? 'Selected' : 'Choose Thumbnail'}
               </Text>
             </TouchableOpacity>
-
             <View style={styles.buttonRow}>
               <TouchableOpacity
                 style={[styles.modalBtn, { backgroundColor: '#ef4444' }]}
@@ -194,7 +224,6 @@ export default function ManageBookChaptersModal({
                 <Ionicons name="close" color="#fff" size={22} />
                 <Text style={styles.modalBtnText}>Cancel</Text>
               </TouchableOpacity>
-
               <TouchableOpacity
                 style={[
                   styles.modalBtn,
@@ -216,7 +245,6 @@ export default function ManageBookChaptersModal({
                 </Text>
               </TouchableOpacity>
             </View>
-
             <View style={{ marginTop: 12 }}>
               {fetching ? (
                 <Text style={{ color: '#fff' }}>Loading chapters...</Text>
@@ -234,25 +262,76 @@ export default function ManageBookChaptersModal({
                       }}
                       style={styles.chapterImg}
                     />
-
                     <View style={{ flex: 1 }}>
-                      <Text style={styles.chapterTitle}>
-                        Chapter {chapter.chapterNumber}
-                      </Text>
-                      {chapter.parts?.map((p, i) => (
-                        <Text key={i} style={styles.partText}>
-                          • {p}
+                      <TouchableOpacity
+                        style={{ flexDirection: 'row', alignItems: 'center' }}
+                        onPress={() =>
+                          setOpenChapterId(
+                            openChapterId === chapter.id ? null : chapter.id
+                          )
+                        }
+                      >
+                        <Text style={styles.chapterTitle}>
+                          Chapter {chapter.chapterNumber}
                         </Text>
-                      ))}
+                        <Ionicons
+                          name={
+                            openChapterId === chapter.id
+                              ? 'chevron-up'
+                              : 'chevron-down'
+                          }
+                          size={24}
+                          color="#ccc"
+                          style={{ marginLeft: 6 }}
+                        />
+                      </TouchableOpacity>
+                      {openChapterId === chapter.id && (
+                        <View style={styles.dropdownContainer}>
+                          <Text style={styles.dropItem}>
+                            Resource Type: {chapter.resourceType}
+                          </Text>
+                          <Text style={styles.dropItem}>
+                            Overview: No overview available
+                          </Text>
+                          <TouchableOpacity
+                            style={styles.deleteBtn}
+                            onPress={() => handleDeleteBook(chapter.id)}
+                          >
+                            <Text
+                              style={{
+                                color: '#fff',
+                                fontWeight: '600',
+                                fontSize: 18,
+                              }}
+                            >
+                              Delete
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
+                      )}
                     </View>
-
-                    <TouchableOpacity style={styles.addPartBtn}>
+                    <TouchableOpacity
+                      style={styles.addPartBtn}
+                      onPress={() => {
+                        setSelectedChapterId(chapter.id);
+                        setPartModalVisible(true);
+                      }}
+                    >
                       <Text style={styles.addPartText}>+ Add Part</Text>
                     </TouchableOpacity>
                   </View>
                 ))
               )}
             </View>
+            <AddPartModal
+              isVisible={partModalVisible}
+              onClose={() => setPartModalVisible(false)}
+              onUpload={() => {
+                // Add your upload logic here
+                // console.log('Upload triggered');
+              }}
+              resourceTypes={categories}
+            />
           </ScrollView>
         </View>
       </View>
@@ -343,12 +422,12 @@ const styles = StyleSheet.create({
   },
   chapterCard: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     backgroundColor: '#2a2a3d',
     borderRadius: 10,
-    padding: 10,
-    marginBottom: 8,
+    padding: 6,
     marginTop: 14,
+    textAlign: 'center',
   },
   chapterImg: {
     width: 50,
@@ -358,7 +437,7 @@ const styles = StyleSheet.create({
   },
   chapterTitle: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '600',
   },
   partText: {
@@ -374,5 +453,25 @@ const styles = StyleSheet.create({
   addPartText: {
     color: '#fff',
     fontWeight: '600',
+    fontSize: 18,
+  },
+  dropdownContainer: {
+    width: 300,
+    backgroundColor: '#1f1f2e',
+    padding: 10,
+    borderRadius: 8,
+    marginTop: 10,
+  },
+  dropItem: {
+    color: '#ccc',
+    marginBottom: 6,
+    fontSize: 18,
+  },
+  deleteBtn: {
+    backgroundColor: '#ef4444',
+    paddingVertical: 8,
+    borderRadius: 6,
+    alignItems: 'center',
+    marginTop: 8,
   },
 });

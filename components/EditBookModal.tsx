@@ -57,14 +57,22 @@ const EditBookModal: React.FC<EditBookModalProps> = ({
             setEditBook((prev) => (prev ? { ...prev, bookName: text } : null))
           }
         />
-
         <TextInput
-          placeholder="Subject"
+          placeholder="Subject Name"
           placeholderTextColor="#888"
           style={styles.input}
           value={editBook?.subject || ''}
           onChangeText={(text) =>
             setEditBook((prev) => (prev ? { ...prev, subject: text } : null))
+          }
+        />
+        <TextInput
+          placeholder="Category Name"
+          placeholderTextColor="#888"
+          style={styles.input}
+          value={editBook?.category || ''}
+          onChangeText={(text) =>
+            setEditBook((prev) => (prev ? { ...prev, category: text } : null))
           }
         />
 
@@ -78,6 +86,24 @@ const EditBookModal: React.FC<EditBookModalProps> = ({
               prev ? { ...prev, educationLevel: text } : null
             )
           }
+        />
+        <TextInput
+          placeholder="Language"
+          placeholderTextColor="#888"
+          style={styles.input}
+          value={editBook?.language || ''}
+          onChangeText={(text) =>
+            setEditBook((prev) => (prev ? { ...prev, language: text } : null))
+          }
+        />
+        <TextInput
+          placeholder="Resource Type"
+          placeholderTextColor="#888"
+          style={styles.input}
+          // value={editBook?.language || ''}
+          // onChangeText={(text) =>
+          //   setEditBook((prev) => (prev ? { ...prev, language: text } : null))
+          // }
         />
 
         <Text style={styles.label}>Thumbnail Image</Text>
