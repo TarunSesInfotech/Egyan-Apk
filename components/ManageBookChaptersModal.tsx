@@ -2,9 +2,14 @@ import {
   getInnerChapterDeleteApi,
   repositoryOverview,
 } from '@/app/api/adminapi/adminDashboard';
-import { getChapterApi } from '@/app/api/adminapi/uploadadminbookapi';
+import {
+  adminChapteruploadapi,
+  getChapterApi,
+} from '@/app/api/adminapi/uploadadminbookapi';
 import AddPartModal from '@/components/AddPartModal';
 import { Ionicons } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as DocumentPicker from 'expo-document-picker';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -38,7 +43,7 @@ export default function ManageBookChaptersModal({
 }: ManageBookChaptersModalProps) {
   const [chapterNumber, setChapterNumber] = useState('');
   const [resourceType, setResourceType] = useState<string | null>(null);
-  const [filePath, setFilePath] = useState<string | null>(null);
+  const [file, setFile] = useState<string | null>(null);
   const [fileName, setFileName] = useState<string | null>(null);
   const [thumbnail, setThumbnail] = useState<string | null>(null);
   const [thumbnailName, setThumbnailName] = useState<string | null>(null);
@@ -54,6 +59,7 @@ export default function ManageBookChaptersModal({
   );
   const [openChapterId, setOpenChapterId] = useState<number | null>(null);
 
+  /* ------------------ FETCH REPOSITORY ------------------ */
   const fetchRepository = async () => {
     try {
       const response = await repositoryOverview();
@@ -82,6 +88,7 @@ export default function ManageBookChaptersModal({
     fetchRepository();
   }, []);
 
+  /* ------------------ FETCH CHAPTERS ------------------ */
   useEffect(() => {
     if (isVisible && bookId) fetchChapters();
   }, [isVisible, bookId]);
@@ -102,14 +109,7 @@ export default function ManageBookChaptersModal({
     }
   };
 
-  const getImageUrl = (url: string) => {
-    if (!url) return '';
-    if (url.includes('index.php/s/') && !url.endsWith('/download')) {
-      return `${url}/download`;
-    }
-    return url;
-  };
-
+  /* ------------------ DELETE CHAPTER ------------------ */
   const handleDeleteBook = (bookId: number) => {
     Alert.alert(
       'Confirm Delete',
@@ -140,6 +140,149 @@ export default function ManageBookChaptersModal({
       { cancelable: true }
     );
   };
+
+  /* ------------------ FIX IMAGE URL ------------------ */
+  const getImageUrl = (url: string) => {
+    if (!url) return '';
+    if (url.includes('index.php/s/') && !url.endsWith('/download')) {
+      return `${url}/download`;
+    }
+    return url;
+  };
+
+  /* ------------------ FILE PICKER LOGIC ------------------ */
+
+  const pickResourceFile = async () => {
+    try {
+      const res = await DocumentPicker.getDocumentAsync({
+        type:
+          resourceType === 'PDF'
+            ? 'application/pdf'
+            : resourceType === 'AUDIO'
+            ? 'audio/*'
+            : '*/*',
+        copyToCacheDirectory: true,
+      });
+      console.log('📂 File Picker Response:', res);
+      if (res.canceled) return;
+
+      const file = res.assets?.[0];
+      if (!file) return;
+
+      console.log('📄 Selected File:', {
+        uri: file.uri,
+        name: file.name,
+        mimeType: file.mimeType,
+        size: file.size,
+      });
+      setFile(file.uri);
+      setFileName(file.name);
+    } catch (e) {
+      alert('File selection failed');
+    }
+  };
+
+  // THUMBNAIL PICKER (DocumentPicker, JPG/PNG)
+  const pickThumbnail = async () => {
+    try {
+      const res = await DocumentPicker.getDocumentAsync({
+        type: ['image/*'],
+        copyToCacheDirectory: true,
+      });
+      console.log('🖼 Thumbnail Picker Response:', res);
+      if (res.canceled) return;
+
+      const file = res.assets?.[0];
+      if (!file) return;
+
+      console.log('🖼 Selected Thumbnail:', {
+        uri: file.uri,
+        name: file.name,
+        mime: file.mimeType,
+        size: file.size,
+      });
+
+      setThumbnail(file.uri);
+      setThumbnailName(file.name);
+    } catch (e) {
+      alert('Thumbnail selection failed');
+    }
+  };
+
+  /* ------------------ UPLOAD CHAPTER ------------------ */
+  const handleUploadChapter = async () => {
+    if (!chapterNumber) return alert('Enter chapter number');
+    if (!resourceType) return alert('Select resource type');
+
+    const formData = new FormData();
+
+    formData.append('chapterNumber', chapterNumber);
+    formData.append('resourceType', resourceType);
+
+    // For PDF and AUDIO → must upload file
+    if (resourceType === 'PDF' || resourceType === 'AUDIO') {
+      if (!file) return alert('Please select a file');
+
+      const mime = resourceType === 'PDF' ? 'application/pdf' : 'audio/*';
+
+      formData.append('file', {
+        uri: file,
+        name: fileName || 'upload',
+        type: mime,
+      } as any);
+    }
+
+    // For VIDEO or MUSIC → use resource link
+    if (resourceType === 'VIDEO' || resourceType === 'MUSIC') {
+      if (!file) return alert('Enter valid URL');
+      formData.append('resourceLink', file);
+    }
+
+    // Thumbnail
+    if (thumbnail) {
+      formData.append('thumbnail', {
+        uri: thumbnail,
+        name: thumbnailName || 'thumbnail.jpg',
+        type: 'image/jpeg',
+      } as any);
+    }
+
+    console.log('🚀 Uploading Chapter with formData:', {
+      chapterNumber,
+      resourceType,
+      file,
+      fileName,
+      thumbnail,
+    });
+
+    setLoading(true);
+
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const response = await adminChapteruploadapi(formData, token, bookId);
+      console.log('response :>> ', response);
+
+      if (!response.success) {
+        alert('Upload failed');
+        return;
+      }
+
+      alert('Upload success');
+      fetchChapters();
+
+      setChapterNumber('');
+      setResourceType(null);
+      setFile(null);
+      setFileName(null);
+      setThumbnail(null);
+    } catch (e) {
+      alert('Network upload failed');
+      console.log(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   /* ------------------ UI ------------------ */
   return (
     <Modal visible={isVisible} animationType="slide" transparent>
@@ -179,7 +322,7 @@ export default function ManageBookChaptersModal({
                 value={resourceType}
                 onChange={(item: any) => {
                   setResourceType(item?.value ?? null);
-                  setFilePath(null);
+                  setFile(null);
                   setFileName(null);
                 }}
                 renderRightIcon={() => (
@@ -191,9 +334,12 @@ export default function ManageBookChaptersModal({
               (resourceType === 'PDF' || resourceType === 'AUDIO' ? (
                 <>
                   <Text style={styles.label}>Upload {resourceType} File</Text>
-                  <TouchableOpacity style={styles.uploadBtn}>
+                  <TouchableOpacity
+                    style={styles.uploadBtn}
+                    onPress={pickResourceFile}
+                  >
                     <Text style={{ color: '#fff' }}>
-                      {filePath ? fileName ?? 'File Selected' : 'Choose File'}
+                      {file ? fileName ?? 'File Selected' : 'Choose File'}
                     </Text>
                   </TouchableOpacity>
                 </>
@@ -204,18 +350,20 @@ export default function ManageBookChaptersModal({
                     placeholder="Paste URL starting with http/https"
                     placeholderTextColor="#888"
                     style={styles.input}
-                    value={filePath ?? ''}
-                    onChangeText={(txt) => setFilePath(txt)}
+                    value={file ?? ''}
+                    onChangeText={(txt) => setFile(txt)}
                     autoCapitalize="none"
                   />
                 </>
               ))}
+
             <Text style={styles.label}>Thumbnail (optional)</Text>
-            <TouchableOpacity style={styles.uploadBtn}>
+            <TouchableOpacity style={styles.uploadBtn} onPress={pickThumbnail}>
               <Text style={{ color: '#fff' }}>
                 {thumbnail ? thumbnailName ?? 'Selected' : 'Choose Thumbnail'}
               </Text>
             </TouchableOpacity>
+
             <View style={styles.buttonRow}>
               <TouchableOpacity
                 style={[styles.modalBtn, { backgroundColor: '#ef4444' }]}
@@ -230,6 +378,7 @@ export default function ManageBookChaptersModal({
                   { backgroundColor: loading ? '#94d3a2' : '#22c55e' },
                 ]}
                 disabled={loading}
+                onPress={handleUploadChapter}
               >
                 {loading ? (
                   <ActivityIndicator
@@ -245,6 +394,7 @@ export default function ManageBookChaptersModal({
                 </Text>
               </TouchableOpacity>
             </View>
+
             <View style={{ marginTop: 12 }}>
               {fetching ? (
                 <Text style={{ color: '#fff' }}>Loading chapters...</Text>

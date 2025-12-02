@@ -2,6 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import React, { useEffect, useState } from 'react';
 import {
   Animated,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -9,155 +10,68 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { Switch } from 'react-native-switch';
+import { userStudentProgress } from '../api/adminapi/adminDashboard';
 
 export default function ManageStudents() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [isVirtualized, setIsVirtualized] = useState(true);
+  const [students, setStudents] = useState<Student[]>([]);
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
-  const students = [
-    {
-      id: 1,
-      name: 'Student 1',
-      email: 'student1@example.com',
-      class: 'Class 1',
-      subject: 'Mathematics',
-      avg: 82,
-      books: [
-        { name: 'Book A - Class 1', progress: 100, color: '#22c55e' },
-        { name: 'Book B - Class 1', progress: 63, color: '#eab308' },
-      ],
-    },
-    {
-      id: 2,
-      name: 'Student 10',
-      email: 'student10@example.com',
-      class: 'Class 10',
-      subject: 'Mathematics',
-      avg: 60,
-      books: [
-        { name: 'Book A - Class 10', progress: 23, color: '#22c55e' },
-        { name: 'Book B - Class 10', progress: 97, color: '#eab308' },
-      ],
-    },
-    {
-      id: 3,
-      name: 'Student 100',
-      email: 'student100@example.com',
-      class: 'Class 4',
-      subject: 'Mathematics',
-      avg: 27,
-      books: [
-        { name: 'Book A - Class 4', progress: 14, color: '#22c55e' },
-        { name: 'Book B - Class 4', progress: 40, color: '#eab308' },
-      ],
-    },
-    {
-      id: 4,
-      name: 'Student 101',
-      email: 'student101@example.com',
-      class: 'Class 5',
-      subject: 'Science',
-      avg: 68,
-      books: [
-        { name: 'Book A - Class 5', progress: 50, color: '#22c55e' },
-        { name: 'Book B - Class 5', progress: 85, color: '#eab308' },
-      ],
-    },
-    {
-      id: 5,
-      name: 'Student 102',
-      email: 'student102@example.com',
-      class: 'Class 6',
-      subject: 'English',
-      avg: 80,
-      books: [
-        { name: 'Book A - Class 6', progress: 76, color: '#22c55e' },
-        { name: 'Book B - Class 6', progress: 83, color: '#eab308' },
-      ],
-    },
-    {
-      id: 6,
-      name: 'Student 103',
-      email: 'student103@example.com',
-      class: 'Class 7',
-      subject: 'Mathematics',
-      avg: 6,
-      books: [
-        { name: 'Book A - Class 7', progress: 11, color: '#22c55e' },
-        { name: 'Book B - Class 7', progress: 1, color: '#eab308' },
-      ],
-    },
-    {
-      id: 7,
-      name: 'Student 104',
-      email: 'student104@example.com',
-      class: 'Class 8',
-      subject: 'Science',
-      avg: 68,
-      books: [
-        { name: 'Book A - Class 8', progress: 75, color: '#22c55e' },
-        { name: 'Book B - Class 8', progress: 60, color: '#eab308' },
-      ],
-    },
-    {
-      id: 8,
-      name: 'Student 105',
-      email: 'student105@example.com',
-      class: 'Class 9',
-      subject: 'English',
-      avg: 18,
-      books: [
-        { name: 'Book A - Class 9', progress: 6, color: '#22c55e' },
-        { name: 'Book B - Class 9', progress: 30, color: '#eab308' },
-      ],
-    },
-    {
-      id: 9,
-      name: 'Student 106',
-      email: 'student106@example.com',
-      class: 'Class 10',
-      subject: 'Mathematics',
-      avg: 82,
-      books: [
-        { name: 'Book A - Class 10', progress: 86, color: '#22c55e' },
-        { name: 'Book B - Class 10', progress: 77, color: '#eab308' },
-      ],
-    },
-    {
-      id: 10,
-      name: 'Student 107',
-      email: 'student107@example.com',
-      class: 'Class 11',
-      subject: 'Mathematics',
-      avg: 50,
-      books: [
-        { name: 'Book A - Class 11', progress: 3, color: '#22c55e' },
-        { name: 'Book B - Class 11', progress: 97, color: '#eab308' },
-      ],
-    },
-  ];
+  const fetchStudentProgress = async () => {
+    try {
+      const response = await userStudentProgress();
 
-  //  const [students, setStudents] = useState<any[]>([]);
+      const formatted = response.data.map(
+        (s: {
+          id: number;
+          username: string;
+          averageProgress?: number;
+          progressByBook: { bookName?: string; progress?: number }[];
+        }) => ({
+          id: s.id,
+          name: s.username,
+          avg: s.averageProgress ?? 0,
+          books: s.progressByBook.map((b, index) => ({
+            name: b.bookName || `Book ${index + 1}`,
+            progress: b.progress || 0,
+            color: index % 2 === 0 ? '#22c55e' : '#eab308',
+          })),
+        })
+      );
+
+      setStudents(formatted);
+    } catch (err) {
+      console.log('err :>> ', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchStudentProgress();
+  }, []);
+
+  const filteredStudents = students.filter((student) =>
+    student.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   const [currentPage, setCurrentPage] = useState(1);
   const studentsPerPage = 500;
 
-  // Simulate fetching all students (replace with API later)
-  useEffect(() => {
-    const tempStudents = Array.from({ length: 21000 }, (_, i) => ({
-      id: i + 1,
-      name: `Student ${i + 1}`,
-      email: `student${i + 1}@school.com`,
-      avatar: 'https://via.placeholder.com/60',
-    }));
-    // setStudents(tempStudents);
-  }, []);
-
-  const totalPages = Math.ceil(students.length / studentsPerPage);
-  const paginatedStudents = students.slice(
+  const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
+  const paginatedStudents = filteredStudents.slice(
     (currentPage - 1) * studentsPerPage,
     currentPage * studentsPerPage
   );
+
+  const openModal = (student: Student) => {
+    setSelectedStudent(student);
+    setModalVisible(true);
+  };
+
+  const closeModal = () => {
+    setSelectedStudent(null);
+    setModalVisible(false);
+  };
 
   return (
     <View style={styles.container}>
@@ -171,20 +85,6 @@ export default function ManageStudents() {
               <Ionicons name="download-outline" size={24} color="#fff" />
               <Text style={styles.exportText}>Export CSV</Text>
             </TouchableOpacity>
-            <View style={styles.toggleContainer}>
-              <Switch
-                value={isVirtualized}
-                onValueChange={setIsVirtualized}
-                circleSize={36}
-                barHeight={32}
-                circleBorderWidth={3}
-                backgroundActive="#1e3a8a"
-                backgroundInactive="#333"
-                circleActiveColor="#3b82f6"
-                circleInActiveColor="#666"
-              />
-              <Text style={styles.toggleLabel}>Virtualize</Text>
-            </View>
           </View>
         </View>
 
@@ -192,7 +92,7 @@ export default function ManageStudents() {
           <View style={styles.searchContainer}>
             <Ionicons name="search" size={18} color="#bbb" />
             <TextInput
-              placeholder="Search name or email..."
+              placeholder="Search name or Username..."
               placeholderTextColor="#999"
               style={styles.searchInput}
               value={searchQuery}
@@ -201,26 +101,17 @@ export default function ManageStudents() {
           </View>
           <View style={styles.dropdownRow}>
             <TouchableOpacity style={styles.dropdown}>
-              <Text style={styles.dropdownText}>All Classes ▼</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.dropdown}>
-              <Text style={styles.dropdownText}>All Subjects ▼</Text>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.dropdownRow}>
-            <TouchableOpacity style={styles.dropdown}>
               <Text style={styles.dropdownText}>Name A → Z ▼</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.dropdown}>
-              <Text style={styles.dropdownText}>12 / page ▼</Text>
             </TouchableOpacity>
           </View>
         </View>
 
-        {students.map((student) => (
-          <StudentCard key={student.id} student={student} />
+        {paginatedStudents.map((student) => (
+          <StudentCard
+            key={student.id}
+            student={student}
+            openModal={openModal}
+          />
         ))}
 
         <View style={styles.paginationContainer}>
@@ -260,6 +151,58 @@ export default function ManageStudents() {
           </View>
         </View>
       </ScrollView>
+
+      <Modal
+        visible={modalVisible}
+        animationType="fade"
+        transparent={true}
+        onRequestClose={closeModal}
+      >
+        <View style={modalStyles.overlay}>
+          <View style={modalStyles.modalBox}>
+            {selectedStudent && (
+              <>
+                <Text style={modalStyles.title}>{selectedStudent.name}</Text>
+
+                <Text style={modalStyles.label}>Average Progress:</Text>
+                <Text style={modalStyles.value}>{selectedStudent.avg}%</Text>
+
+                <Text style={modalStyles.label}>Book-wise Progress</Text>
+
+                {selectedStudent.books.map((book, index) => (
+                  <View key={index} style={{ marginBottom: 10 }}>
+                    <View style={modalStyles.row}>
+                      <Text style={modalStyles.bookName}>{book.name}</Text>
+                      <Text style={modalStyles.bookPercent}>
+                        {book.progress}%
+                      </Text>
+                    </View>
+
+                    <View style={modalStyles.progressTrack}>
+                      <View
+                        style={[
+                          modalStyles.progressFill,
+                          {
+                            width: `${book.progress}%`,
+                            backgroundColor: book.color,
+                          },
+                        ]}
+                      />
+                    </View>
+                  </View>
+                ))}
+
+                <TouchableOpacity
+                  style={modalStyles.closeBtn}
+                  onPress={closeModal}
+                >
+                  <Text style={modalStyles.closeText}>Close</Text>
+                </TouchableOpacity>
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -273,14 +216,17 @@ interface StudentBook {
 interface Student {
   id: number;
   name: string;
-  email: string;
-  class: string;
-  subject: string;
   avg: number;
   books: StudentBook[];
 }
 
-function StudentCard({ student }: { student: Student }) {
+function StudentCard({
+  student,
+  openModal,
+}: {
+  student: Student;
+  openModal: any;
+}) {
   const [expanded, setExpanded] = useState(false);
   const animatedHeight = useState(new Animated.Value(0))[0];
 
@@ -301,10 +247,6 @@ function StudentCard({ student }: { student: Student }) {
         </View>
         <View style={{ flex: 1 }}>
           <Text style={styles.studentName}>{student.name}</Text>
-          <Text style={styles.studentEmail}>{student.email}</Text>
-          <Text style={styles.studentClass}>
-            {student.class} • {student.subject}
-          </Text>
         </View>
 
         <View style={styles.avgContainer}>
@@ -314,7 +256,10 @@ function StudentCard({ student }: { student: Student }) {
           </View>
         </View>
 
-        <TouchableOpacity style={styles.viewBtn}>
+        <TouchableOpacity
+          style={styles.viewBtn}
+          onPress={() => openModal(student)}
+        >
           <Text style={styles.viewText}>View</Text>
         </TouchableOpacity>
 
@@ -333,20 +278,31 @@ function StudentCard({ student }: { student: Student }) {
           { height: animatedHeight, overflow: 'hidden' },
         ]}
       >
-        {student.books.map((book, idx) => (
-          <View key={idx} style={styles.progressContainer}>
-            <Text style={styles.bookTitle}>{book.name}</Text>
-            <View style={styles.progressBarBackground}>
-              <View
-                style={[
-                  styles.progressBarFill,
-                  { width: `${book.progress}%`, backgroundColor: book.color },
-                ]}
-              />
+        {student.books.map((book, idx) => {
+          return (
+            <View key={idx} style={styles.progressContainer}>
+              <Text style={styles.bookTitle}>{book.name}</Text>
+              <View style={styles.progressBarBackground}>
+                <View
+                  style={[
+                    styles.progressBarFill,
+                    { width: `${book.progress}%`, backgroundColor: book.color },
+                  ]}
+                />
+              </View>
+              <Text style={styles.progressPercent}>{book.progress}%</Text>
+              <View style={styles.progressBarBackground}>
+                <View
+                  style={[
+                    styles.progressBarFill,
+                    { width: `${book.progress}%`, backgroundColor: book.color },
+                  ]}
+                />
+              </View>
+              <Text style={styles.progressPercent}>{book.progress}%</Text>
             </View>
-            <Text style={styles.progressPercent}>{book.progress}%</Text>
-          </View>
-        ))}
+          );
+        })}
       </Animated.View>
     </View>
   );
@@ -434,15 +390,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  toggleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 18,
-  },
-  toggleLabel: {
-    color: '#ccc',
-    fontSize: 20,
-  },
   studentCard: {
     backgroundColor: '#1e1e1e',
     borderRadius: 12,
@@ -471,14 +418,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
-  },
-  studentEmail: {
-    color: '#aaa',
-    fontSize: 13,
-  },
-  studentClass: {
-    color: '#bbb',
-    fontSize: 13,
   },
   avgContainer: {
     alignItems: 'flex-end',
@@ -583,6 +522,70 @@ const styles = StyleSheet.create({
   pageNumber: {
     color: '#fff',
     fontSize: 14,
+    fontWeight: '600',
+  },
+});
+
+const modalStyles = StyleSheet.create({
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalBox: {
+    width: '85%',
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    padding: 20,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 12,
+  },
+  label: {
+    marginTop: 12,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  value: {
+    fontSize: 15,
+    marginBottom: 10,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  bookName: {
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  bookPercent: {
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  progressTrack: {
+    width: '100%',
+    backgroundColor: '#ddd',
+    height: 8,
+    borderRadius: 10,
+    marginTop: 4,
+  },
+  progressFill: {
+    height: 8,
+    borderRadius: 10,
+  },
+  closeBtn: {
+    marginTop: 20,
+    backgroundColor: '#2563eb',
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  closeText: {
+    color: '#fff',
+    textAlign: 'center',
+    fontSize: 16,
     fontWeight: '600',
   },
 });
