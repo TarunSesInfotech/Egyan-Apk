@@ -30,9 +30,6 @@ export default function StudentCard({
 }) {
   const [expanded, setExpanded] = useState(false);
 
-  //   const toggleExpand = () => {
-  //     setExpanded(!expanded);
-  //   };
   return (
     <View style={styles.studentCard}>
       <View style={styles.cardHeader}>
@@ -171,14 +168,9 @@ const styles = StyleSheet.create({
 
   scrollContainer: {
     marginTop: 12,
-    height: 180, // FIXED HEIGHT → ensures proper scrolling
+    height: 180,
     overflow: 'hidden',
   },
-  //   cardContent: {
-  //     marginTop: 10,
-  //     maxHeight: 180,
-  //     overflow: 'hidden',
-  //   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',

@@ -12,7 +12,6 @@ import {
 } from 'react-native';
 import { userStudentProgress } from '../api/adminapi/adminDashboard';
 
-// Define the Student type
 export type Student = {
   id: number;
   name: string;
@@ -29,6 +28,9 @@ export default function ManageStudents() {
   const [students, setStudents] = useState<Student[]>([]);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+
+  const [sortVisible, setSortVisible] = useState(false);
+  const [sortType, setSortType] = useState('Name A → Z');
 
   const fetchStudentProgress = async () => {
     try {
@@ -62,15 +64,41 @@ export default function ManageStudents() {
     fetchStudentProgress();
   }, []);
 
-  const filteredStudents = students.filter((student) =>
-    student.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredStudents = students.filter((student) => {
+    const q = searchQuery.toLowerCase();
+
+    return (
+      student.name.toLowerCase().includes(q) ||
+      student.id.toString().includes(q) ||
+      student.avg.toString().includes(q) ||
+      student.books.some(
+        (book) =>
+          book.name.toLowerCase().includes(q) ||
+          book.progress.toString().includes(q)
+      )
+    );
+  });
+
+  const sortedStudents = [...filteredStudents].sort((a, b) => {
+    switch (sortType) {
+      case 'Name A → Z':
+        return a.name.localeCompare(b.name);
+      case 'Name Z → A':
+        return b.name.localeCompare(a.name);
+      case 'Avg High → Low':
+        return b.avg - a.avg;
+      case 'Avg Low → High':
+        return a.avg - b.avg;
+      default:
+        return 0;
+    }
+  });
 
   const [currentPage, setCurrentPage] = useState(1);
-  const studentsPerPage = filteredStudents.length;
+  const studentsPerPage = sortedStudents.length;
+  const totalPages = Math.ceil(sortedStudents.length / studentsPerPage);
 
-  const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
-  const paginatedStudents = filteredStudents.slice(
+  const paginatedStudents = sortedStudents.slice(
     (currentPage - 1) * studentsPerPage,
     currentPage * studentsPerPage
   );
@@ -83,6 +111,11 @@ export default function ManageStudents() {
   const closeModal = () => {
     setSelectedStudent(null);
     setModalVisible(false);
+  };
+
+  const applySort = (type: string) => {
+    setSortType(type);
+    setSortVisible(false);
   };
 
   return (
@@ -102,9 +135,9 @@ export default function ManageStudents() {
 
         <View style={styles.controlsRow}>
           <View style={styles.searchContainer}>
-            <Ionicons name="search" size={18} color="#bbb" />
+            <Ionicons name="search" size={24} color="#bbb" />
             <TextInput
-              placeholder="Search name or Username..."
+              placeholder="Search name, id, or keywords..."
               placeholderTextColor="#999"
               style={styles.searchInput}
               value={searchQuery}
@@ -112,9 +145,44 @@ export default function ManageStudents() {
             />
           </View>
           <View style={styles.dropdownRow}>
-            <TouchableOpacity style={styles.dropdown}>
-              <Text style={styles.dropdownText}>Name A → Z ▼</Text>
+            <TouchableOpacity
+              style={styles.dropdown}
+              onPress={() => setSortVisible(!sortVisible)}
+            >
+              <Text style={styles.dropdownText}>{sortType} ▼</Text>
             </TouchableOpacity>
+
+            {sortVisible && (
+              <View style={styles.dropdownMenu}>
+                <TouchableOpacity
+                  style={styles.dropdownItem}
+                  onPress={() => applySort('Name A → Z')}
+                >
+                  <Text style={styles.dropdownItemText}>Name A → Z</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.dropdownItem}
+                  onPress={() => applySort('Name Z → A')}
+                >
+                  <Text style={styles.dropdownItemText}>Name Z → A</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.dropdownItem}
+                  onPress={() => applySort('Avg High → Low')}
+                >
+                  <Text style={styles.dropdownItemText}>Avg High → Low</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  style={styles.dropdownItem}
+                  onPress={() => applySort('Avg Low → High')}
+                >
+                  <Text style={styles.dropdownItemText}>Avg Low → High</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         </View>
 
@@ -128,7 +196,7 @@ export default function ManageStudents() {
 
         <View style={styles.paginationContainer}>
           <Text style={styles.paginationText}>
-            Showing {studentsPerPage} students — page {currentPage} /{' '}
+            Showing {studentsPerPage} students — page {currentPage} /
             {totalPages}
           </Text>
 
@@ -211,13 +279,13 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     color: '#fff',
+    fontSize: 18,
     marginLeft: 6,
     flex: 1,
   },
   dropdownRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+    position: 'relative',
+    width: 170,
   },
   dropdown: {
     backgroundColor: '#1e1e1e',
@@ -227,7 +295,25 @@ const styles = StyleSheet.create({
   },
   dropdownText: {
     color: '#ddd',
-    fontSize: 14,
+    fontSize: 20,
+  },
+  dropdownMenu: {
+    position: 'absolute',
+    top: 45,
+    right: 0,
+    backgroundColor: '#1e1e1e',
+    borderRadius: 8,
+    width: 170,
+    paddingVertical: 6,
+    zIndex: 2,
+  },
+  dropdownItem: {
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+  },
+  dropdownItemText: {
+    color: '#eee',
+    fontSize: 16,
   },
   headerRow: {
     flexDirection: 'row',
