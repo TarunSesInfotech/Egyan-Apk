@@ -67,7 +67,7 @@ export default function ManageStudents() {
   );
 
   const [currentPage, setCurrentPage] = useState(1);
-  const studentsPerPage = 500;
+  const studentsPerPage = filteredStudents.length;
 
   const totalPages = Math.ceil(filteredStudents.length / studentsPerPage);
   const paginatedStudents = filteredStudents.slice(

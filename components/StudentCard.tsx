@@ -30,9 +30,9 @@ export default function StudentCard({
 }) {
   const [expanded, setExpanded] = useState(false);
 
-  const toggleExpand = () => {
-    setExpanded(!expanded);
-  };
+  //   const toggleExpand = () => {
+  //     setExpanded(!expanded);
+  //   };
   return (
     <View style={styles.studentCard}>
       <View style={styles.cardHeader}>
@@ -58,7 +58,10 @@ export default function StudentCard({
           <Text style={styles.viewText}>View</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={toggleExpand} style={styles.expandButton}>
+        <TouchableOpacity
+          onPress={() => setExpanded(!expanded)}
+          style={styles.expandButton}
+        >
           <Ionicons
             name={expanded ? 'chevron-up' : 'chevron-down'}
             size={22}
@@ -68,10 +71,14 @@ export default function StudentCard({
       </View>
 
       {expanded && (
-        <View style={styles.cardContent}>
-          <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={styles.scrollContainer}>
+          <ScrollView
+            nestedScrollEnabled={true}
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{ paddingBottom: 20 }}
+          >
             {student.books.map((book, index) => (
-              <View key={index} style={{ marginBottom: 10 }}>
+              <View key={index} style={{ marginBottom: 12 }}>
                 <View style={styles.row}>
                   <Text style={styles.bookName}>{book.name}</Text>
                   <Text style={styles.bookPercent}>{book.progress}%</Text>
@@ -161,10 +168,17 @@ const styles = StyleSheet.create({
   expandButton: {
     paddingHorizontal: 8,
   },
-  cardContent: {
-    marginTop: 10,
-    maxHeight: 180,
+
+  scrollContainer: {
+    marginTop: 12,
+    height: 180, // FIXED HEIGHT → ensures proper scrolling
+    overflow: 'hidden',
   },
+  //   cardContent: {
+  //     marginTop: 10,
+  //     maxHeight: 180,
+  //     overflow: 'hidden',
+  //   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
