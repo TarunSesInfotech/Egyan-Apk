@@ -95,13 +95,17 @@ export default function ManageStudents() {
   });
 
   const [currentPage, setCurrentPage] = useState(1);
-  const studentsPerPage = sortedStudents.length;
+  const studentsPerPage = 10;
   const totalPages = Math.ceil(sortedStudents.length / studentsPerPage);
 
   const paginatedStudents = sortedStudents.slice(
     (currentPage - 1) * studentsPerPage,
     currentPage * studentsPerPage
   );
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, sortType]);
 
   const openModal = (student: Student) => {
     setSelectedStudent(student);
@@ -196,7 +200,7 @@ export default function ManageStudents() {
 
         <View style={styles.paginationContainer}>
           <Text style={styles.paginationText}>
-            Showing {studentsPerPage} students — page {currentPage} /
+            Showing {paginatedStudents.length} students — page {currentPage} of{' '}
             {totalPages}
           </Text>
 
@@ -343,15 +347,14 @@ const styles = StyleSheet.create({
   },
   paginationContainer: {
     flexDirection: 'row',
-    marginTop: 30,
+    marginTop: 10,
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingBottom: 40,
   },
   paginationText: {
     color: '#aaa',
-    marginBottom: 12,
-    fontSize: 14,
+    fontSize: 20,
     textAlign: 'center',
   },
   paginationButtons: {
@@ -371,7 +374,7 @@ const styles = StyleSheet.create({
   },
   pageButtonText: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: 20,
     fontWeight: '600',
   },
   pageIndicator: {
@@ -382,7 +385,7 @@ const styles = StyleSheet.create({
   },
   pageNumber: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: 20,
     fontWeight: '600',
   },
 });

@@ -61,7 +61,7 @@ export default function StudentCard({
         >
           <Ionicons
             name={expanded ? 'chevron-up' : 'chevron-down'}
-            size={22}
+            size={24}
             color="#fff"
           />
         </TouchableOpacity>
@@ -123,12 +123,12 @@ const styles = StyleSheet.create({
   },
   avatarText: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
   },
   studentName: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: 'bold',
   },
   avgContainer: {
@@ -137,17 +137,17 @@ const styles = StyleSheet.create({
   },
   avgText: {
     color: '#fff',
-    fontSize: 13,
+    fontSize: 16,
     marginBottom: 4,
   },
   avgBarBackground: {
     width: 70,
-    height: 8,
+    height: 10,
     backgroundColor: '#333',
     borderRadius: 5,
   },
   avgBarFill: {
-    height: 8,
+    height: 10,
     backgroundColor: '#22c55e',
     borderRadius: 5,
   },
@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
   },
   viewText: {
     color: '#C9CCD1FF',
-    fontSize: 16,
+    fontSize: 20,
     fontWeight: '600',
   },
   expandButton: {
@@ -176,24 +176,24 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   bookName: {
-    fontSize: 15,
+    fontSize: 20,
     fontWeight: '500',
     color: '#fff',
   },
   bookPercent: {
-    fontSize: 15,
+    fontSize: 20,
     fontWeight: '500',
     color: '#fff',
   },
   progressTrack: {
     width: '100%',
     backgroundColor: '#fff',
-    height: 8,
+    height: 10,
     borderRadius: 10,
     marginTop: 4,
   },
   progressFill: {
-    height: 8,
+    height: 10,
     borderRadius: 10,
   },
 });

@@ -81,40 +81,40 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   title: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 12,
   },
   label: {
     marginTop: 12,
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: '600',
   },
   value: {
-    fontSize: 15,
-    marginBottom: 10,
+    fontSize: 18,
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginTop: 10,
   },
   bookName: {
-    fontSize: 15,
+    fontSize: 18,
     fontWeight: '500',
   },
   bookPercent: {
-    fontSize: 15,
+    fontSize: 20,
     fontWeight: '500',
   },
   progressTrack: {
     width: '100%',
     backgroundColor: '#ddd',
-    height: 8,
+    height: 10,
     borderRadius: 10,
     marginTop: 4,
   },
   progressFill: {
-    height: 8,
+    height: 10,
     borderRadius: 10,
   },
   closeBtn: {
