@@ -3,7 +3,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
 import {
-  Alert,
   Animated,
   ImageBackground,
   StyleSheet,
@@ -12,6 +11,12 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import {
+  ALERT_TYPE,
+  AlertNotificationRoot,
+  Dialog,
+  Toast,
+} from 'react-native-alert-notification';
 import { loginUser } from '../app/api/userLoginApi';
 
 export default function Home() {
@@ -50,7 +55,12 @@ export default function Home() {
 
   const handleLogin = async () => {
     if (!username || !password) {
-      Alert.alert('Error', 'Please enter both email and password');
+      Dialog.show({
+        type: ALERT_TYPE.DANGER,
+        title: 'Missing Fields',
+        textBody: 'Please enter both username and password.',
+        button: 'Close',
+      });
       return;
     }
     setLoading(true);
@@ -59,16 +69,28 @@ export default function Home() {
     if (result.success) {
       await AsyncStorage.setItem('token', result.token);
       await AsyncStorage.setItem('role', result.role);
-      Alert.alert('Login Successful');
-      if (result.role === 'admin') {
-        router.replace('/admindashboard');
-      } else if (result.role === 'student') {
-        router.replace('/studentdashboard');
-      } else {
-        router.replace('/');
-      }
+      Dialog.show({
+        type: ALERT_TYPE.SUCCESS,
+        title: 'Login Successful',
+        textBody: 'Welcome to E-Gyan Library!',
+        button: 'Continue',
+        onHide: () => {
+          if (result.role === 'admin') {
+            router.replace('/admindashboard');
+          } else if (result.role === 'student') {
+            router.replace('/studentdashboard');
+          } else {
+            router.replace('/');
+          }
+        },
+      });
     } else {
-      Alert.alert('Login Failed', result.message || 'Invalid credentials');
+      Dialog.show({
+        type: ALERT_TYPE.DANGER,
+        title: 'Login Failed',
+        textBody: result.message || 'Invalid username or password.',
+        button: 'Try Again',
+      });
     }
   };
 
@@ -88,82 +110,86 @@ export default function Home() {
           }
         }
       } catch (error) {
-        console.log('Error checking token: ', error);
+        Toast.show({
+          type: ALERT_TYPE.WARNING,
+          title: 'Warning',
+          textBody: 'Error checking saved login!',
+        });
       }
     };
-
     checkLogin();
   }, []);
 
   return (
-    <ImageBackground
-      source={require('../assets/images/signup3.jpg')}
-      style={styles.background}
-    >
-      <Animated.Text
-        style={[
-          styles.mainHeading,
-          { opacity: fadeAnim, transform: [{ translateY: slideAnim }] },
-        ]}
+    <AlertNotificationRoot>
+      <ImageBackground
+        source={require('../assets/images/signup3.jpg')}
+        style={styles.background}
       >
-        Welcome to E-Gyan Libarary Management System
-      </Animated.Text>
-
-      <View style={styles.card}>
-        <Text style={styles.heading}>Unlock Knowledge.</Text>
-        <Text style={styles.subHeading}>Log In.</Text>
-
-        <TextInput
-          style={styles.input}
-          placeholder="username"
-          placeholderTextColor="#aaa"
-          value={username}
-          onChangeText={setUsername}
-        />
-
-        <View style={styles.passwordContainer}>
-          <TextInput
-            style={styles.passwordInput}
-            placeholder="Password"
-            placeholderTextColor="#aaa"
-            secureTextEntry={!passwordVisible}
-            value={password}
-            onChangeText={setPassword}
-          />
-          <TouchableOpacity
-            onPress={() => setPasswordVisible(!passwordVisible)}
-          >
-            <Ionicons
-              name={passwordVisible ? 'eye' : 'eye-off'}
-              size={22}
-              color="#aaa"
-            />
-          </TouchableOpacity>
-        </View>
-
-        <TouchableOpacity
-          style={styles.button}
-          onPress={handleLogin}
-          disabled={loading}
+        <Animated.Text
+          style={[
+            styles.mainHeading,
+            { opacity: fadeAnim, transform: [{ translateY: slideAnim }] },
+          ]}
         >
-          <Text style={styles.buttonText}>
-            {loading ? 'Logging in...' : 'Log In'}
-          </Text>
-        </TouchableOpacity>
+          Welcome to E-Gyan Libarary Management System
+        </Animated.Text>
 
-        <View style={styles.links}>
-          <Text style={styles.linkText}>Start learning—Log In?</Text>
-          <Text style={styles.linkText}>Forgot Password</Text>
+        <View style={styles.card}>
+          <Text style={styles.heading}>Unlock Knowledge.</Text>
+          <Text style={styles.subHeading}>Log In.</Text>
+
+          <TextInput
+            style={styles.input}
+            placeholder="username"
+            placeholderTextColor="#aaa"
+            value={username}
+            onChangeText={setUsername}
+          />
+
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={styles.passwordInput}
+              placeholder="Password"
+              placeholderTextColor="#aaa"
+              secureTextEntry={!passwordVisible}
+              value={password}
+              onChangeText={setPassword}
+            />
+            <TouchableOpacity
+              onPress={() => setPasswordVisible(!passwordVisible)}
+            >
+              <Ionicons
+                name={passwordVisible ? 'eye' : 'eye-off'}
+                size={22}
+                color="#aaa"
+              />
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity
+            style={styles.button}
+            onPress={handleLogin}
+            disabled={loading}
+          >
+            <Text style={styles.buttonText}>
+              {loading ? 'Logging in...' : 'Log In'}
+            </Text>
+          </TouchableOpacity>
+
+          <View style={styles.links}>
+            <Text style={styles.linkText}>Start learning—Log In?</Text>
+            <Text style={styles.linkText}>Forgot Password</Text>
+          </View>
         </View>
-      </View>
-    </ImageBackground>
+      </ImageBackground>
+    </AlertNotificationRoot>
   );
 }
 
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    resizeMode: 'cover',
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 15,
@@ -185,11 +211,6 @@ const styles = StyleSheet.create({
     width: '90%',
     minHeight: 500,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.4,
-    shadowOffset: { width: 0, height: 5 },
-    shadowRadius: 10,
-    elevation: 8,
   },
   heading: {
     fontSize: 24,
@@ -234,11 +255,6 @@ const styles = StyleSheet.create({
     width: '100%',
     alignItems: 'center',
     marginTop: 10,
-    shadowColor: '#3572ef',
-    shadowOpacity: 0.4,
-    shadowOffset: { width: 0, height: 4 },
-    shadowRadius: 6,
-    elevation: 6,
   },
   buttonText: {
     color: '#fff',

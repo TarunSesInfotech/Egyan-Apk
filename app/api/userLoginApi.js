@@ -17,9 +17,9 @@ export const loginUser = async (username, password) => {
     );
     const data = await response.json();
     if (data) {
-      await AsyncStorage.setItem('access_token', data.access_token);
+      await AsyncStorage.setItem('access_token', data.token);
       await AsyncStorage.setItem('role', data.role);
-      return { success: true, token: data.access_token, role: data.role };
+      return { success: true, token: data.token, role: data.role };
     } else {
       return { success: false, message: 'Login failed' };
     }

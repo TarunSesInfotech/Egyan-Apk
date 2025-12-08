@@ -2,9 +2,11 @@ import WelcomeHeader from '@/components/WelcomeHeader';
 import React, { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
@@ -66,6 +68,27 @@ const CircularChart: React.FC<CircularChartProps> = ({
 export default function AdminDashboard() {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [showChangelog, setShowChangelog] = useState(false);
+
+  const changelogData = [
+    {
+      date: 'Nov 25, 2023',
+      version: 'Version 0.0',
+      improvements: ['Added a new page with a changelog'],
+      bugfixes: [
+        'Fixed AI operation in some cases',
+        'Fixed technical problems that led to failures',
+      ],
+      gradient: ['#2b2d42', '#1e3c72'],
+    },
+    {
+      date: 'Nov 6, 2025',
+      version: 'Version 0.0.1',
+      improvements: ['Fix bugs on manage book'],
+      bugfixes: ['Reduced data loading and updating time'],
+      gradient: ['#3a1c71', '#d76d77'],
+    },
+  ];
 
   const fetchStats = async () => {
     try {
@@ -144,7 +167,7 @@ export default function AdminDashboard() {
         <View style={styles.chartsRow}>
           <CircularChart
             value={stats.totalStudents}
-            total={100} 
+            total={100}
             label="Students"
             color="#42a5f5"
           />
@@ -155,7 +178,102 @@ export default function AdminDashboard() {
             color="#66bb6a"
           />
         </View>
+
+        <View style={styles.releaseContainer}>
+          <Text style={styles.releaseTitle}>Latest Release</Text>
+
+          <View style={styles.releaseBox}>
+            <View>
+              <Text style={styles.releaseAppName}>eGyan</Text>
+              <Text style={styles.releaseVersion}>
+                Version: <Text style={{ color: '#43FF9BFF' }}>v0.0.0</Text>
+              </Text>
+              <Text style={styles.releaseUpdated}>
+                Last Updated:{' '}
+                <Text style={{ color: '#66bb6a' }}>12 November 2025</Text>
+              </Text>
+            </View>
+
+            <View style={{ alignItems: 'flex-end' }}>
+              <TouchableOpacity
+                style={styles.releaseButton}
+                onPress={() => setShowChangelog(true)}
+              >
+                <Text style={styles.releaseButtonText}>🚀 Latest Release</Text>
+              </TouchableOpacity>
+              <Text style={styles.releaseDeveloper}>
+                Developed by{' '}
+                <Text style={styles.releaseDevName}>SEST INFOTECH PVT LTD</Text>
+              </Text>
+              <Text style={styles.releaseRights}>
+                © 2025 All rights reserved
+              </Text>
+            </View>
+          </View>
+        </View>
       </ScrollView>
+
+      <Modal
+        visible={showChangelog}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setShowChangelog(false)}
+      >
+        <View style={styles.modalBackdrop}>
+          <View style={styles.modalContainer}>
+            {/* Banner */}
+            <View style={styles.banner}>
+              <Text style={styles.bannerIcon}>🚀</Text>
+              <Text style={styles.bannerTitle}>What's New?</Text>
+              <Text style={styles.bannerSubtitle}>
+                A changelog of the latest feature releases, product updates, and
+                bug fixes.
+              </Text>
+            </View>
+
+            {/* Timeline Start */}
+            <ScrollView showsVerticalScrollIndicator={false}>
+              {changelogData.map((item, index) => (
+                <View key={index}>
+                  {/* Timeline Row */}
+                  <View style={styles.timelineRow}>
+                    <View style={styles.dot}></View>
+                    <Text style={styles.dateText}>{item.date}</Text>
+                  </View>
+
+                  {/* Card */}
+                  <View style={[styles.changelogCard]}>
+                    <Text style={styles.versionTitle}>{item.version}</Text>
+
+                    <Text style={styles.changelogHeading}>
+                      Improvements & Changes
+                    </Text>
+                    {item.improvements.map((imp, i) => (
+                      <Text key={i} style={styles.bullet}>
+                        • {imp}
+                      </Text>
+                    ))}
+
+                    <Text style={styles.changelogHeadingBug}>Bugfixes</Text>
+                    {item.bugfixes.map((bug, i) => (
+                      <Text key={i} style={styles.bullet}>
+                        • {bug}
+                      </Text>
+                    ))}
+                  </View>
+                </View>
+              ))}
+
+              <TouchableOpacity
+                style={styles.closeBtn}
+                onPress={() => setShowChangelog(false)}
+              >
+                <Text style={styles.closeBtnText}>Close</Text>
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -230,5 +348,186 @@ const styles = StyleSheet.create({
   centerLabel: {
     color: '#aaa',
     fontSize: 18,
+  },
+  releaseContainer: {
+    marginTop: 30,
+    marginBottom: 40,
+  },
+
+  releaseTitle: {
+    color: '#43FF9BFF',
+    fontSize: 26,
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+
+  releaseBox: {
+    backgroundColor: '#1e1e2d',
+    padding: 20,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#333',
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+
+  releaseAppName: {
+    color: '#fff',
+    fontSize: 24,
+    marginBottom: 5,
+    fontWeight: '600',
+  },
+
+  releaseVersion: {
+    color: '#ccc',
+    fontSize: 20,
+    marginBottom: 5,
+  },
+
+  releaseUpdated: {
+    color: '#ccc',
+    fontSize: 20,
+    marginBottom: 10,
+  },
+
+  releaseButton: {
+    backgroundColor: '#42a5f5',
+    paddingVertical: 10,
+    paddingHorizontal: 18,
+    borderRadius: 10,
+    marginBottom: 10,
+  },
+
+  releaseButtonText: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+
+  releaseDeveloper: {
+    color: '#ccc',
+    fontSize: 18,
+  },
+
+  releaseDevName: {
+    color: '#42a5f5',
+    fontWeight: 'bold',
+  },
+
+  releaseRights: {
+    color: '#777',
+    fontSize: 18,
+    marginTop: 4,
+  },
+
+  modalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'center',
+    padding: 20,
+  },
+
+  modalContainer: {
+    backgroundColor: '#121212',
+    borderRadius: 20,
+    padding: 15,
+    maxHeight: '90%',
+  },
+  banner: {
+    backgroundColor: '#1d8cf8',
+    borderRadius: 16,
+    padding: 20,
+    marginBottom: 20,
+  },
+
+  bannerIcon: {
+    fontSize: 30,
+    textAlign: 'center',
+  },
+
+  bannerTitle: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    color: '#fff',
+    textAlign: 'center',
+    marginTop: 5,
+  },
+
+  bannerSubtitle: {
+    fontSize: 14,
+    color: '#e0e0e0',
+    textAlign: 'center',
+    marginTop: 4,
+  },
+
+  timelineRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+    marginTop: 10,
+  },
+
+  dot: {
+    width: 14,
+    height: 14,
+    backgroundColor: '#1d8cf8',
+    borderRadius: 7,
+    marginRight: 10,
+    borderWidth: 2,
+    borderColor: '#0f1a2b',
+  },
+
+  dateText: {
+    color: '#fff',
+    fontSize: 14,
+  },
+
+  changelogCard: {
+    backgroundColor: '#1e1e2d',
+    padding: 20,
+    borderRadius: 15,
+    marginBottom: 30,
+    borderWidth: 1,
+    borderColor: '#2b2b40',
+  },
+
+  versionTitle: {
+    fontSize: 28,
+    color: '#fff',
+    fontWeight: 'bold',
+    marginBottom: 12,
+  },
+
+  changelogHeading: {
+    fontSize: 18,
+    color: '#8ab4ff',
+    marginBottom: 8,
+    marginTop: 10,
+  },
+
+  changelogHeadingBug: {
+    fontSize: 18,
+    color: '#ff6ab4',
+    marginBottom: 8,
+    marginTop: 10,
+  },
+
+  bullet: {
+    color: '#e0e0e0',
+    fontSize: 15,
+    marginBottom: 6,
+  },
+
+  closeBtn: {
+    backgroundColor: '#1d8cf8',
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  closeBtnText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });

@@ -6,7 +6,6 @@ export const adminBookuploadapi = async (formData, token) => {
     const res = await fetch(`https://e-gyan-9tky.onrender.com/books/upload`, {
       method: 'POST',
       body: formData,
-      credentials: 'include',
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -30,7 +29,6 @@ export const adminChapteruploadapi = async (formData, token, bookId) => {
       {
         method: 'POST',
         body: formData,
-        credentials: 'include',
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -90,6 +88,3 @@ export const getChapterDeleteApi = async (bookId) => {
     return { success: false, message: error.message };
   }
 };
-
-
-

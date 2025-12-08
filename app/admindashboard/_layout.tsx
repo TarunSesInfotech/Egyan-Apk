@@ -8,7 +8,6 @@ import {
 } from '@react-navigation/drawer';
 import { useRouter } from 'expo-router';
 import { Drawer } from 'expo-router/drawer';
-import React from 'react';
 import { View } from 'react-native';
 
 // ==================== Custom Drawer ====================

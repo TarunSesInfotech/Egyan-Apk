@@ -65,6 +65,66 @@ export const repositoryOverview = async () => {
   }
 };
 
+export const addRepository = async ({ type, value, token }) => {
+  if (!token) {
+    return { success: false, message: 'Access token missing!' };
+  }
+
+  try {
+    const bodyData = { type, value };
+
+    console.log('📤 Sending to API:', bodyData);
+
+    const response = await fetch(
+      'https://e-gyan-9tky.onrender.com/repository',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(bodyData),
+      }
+    );
+
+    const raw = await response.text();
+    console.log('📩 RAW RESPONSE TEXT:', raw);
+
+    if (!response.ok) {
+      return { success: false, message: raw };
+    }
+
+    return { success: true, data: JSON.parse(raw) };
+  } catch (err) {
+    console.error('❌ Add Repository Error:', err);
+    return { success: false, message: err.message };
+  }
+};
+
+// Delete repositry
+// export const DeleteRepository = async (repoId) => {
+//   try {
+//     const response = await fetch(
+//       `https://e-gyan-9tky.onrender.com/repository${repoId}`,
+//       {
+//         method: 'DELETE',
+//         headers: {
+//           'Content-Type': 'application/json',
+//         },
+//       }
+//     );
+
+//     if (!response.ok) {
+//       const errorText = await response.text();
+//       throw new Error(`HTTP ${response.status}: ${errorText}`);
+//     }
+
+//     return { success: true, data: await response.json() };
+//   } catch (e) {
+//     return { success: false, message: e.message };
+//   }
+// };
+
 // Role management Api
 export const userRoleOverview = async () => {
   try {
