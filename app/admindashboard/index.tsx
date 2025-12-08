@@ -140,7 +140,31 @@ export default function AdminDashboard() {
     <View style={styles.container}>
       <ScrollView style={styles.mainContent}>
         <WelcomeHeader />
-        <Text style={styles.sectionTitle}>Dashboard Overview</Text>
+        <View
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginTop: 20,
+            marginBottom: 20,
+          }}
+        >
+          <Text style={styles.sectionTitle}>Dashboard Overview</Text>
+
+          <TouchableOpacity
+            onPress={() => console.log('Button Pressed')}
+            style={{
+              backgroundColor: '#42a5f5',
+              paddingVertical: 6,
+              paddingHorizontal: 14,
+              borderRadius: 8,
+            }}
+          >
+            <Text style={{ color: '#fff', fontSize: 20, fontWeight: 'bold' }}>
+              Upload Credentails
+            </Text>
+          </TouchableOpacity>
+        </View>
 
         <View style={styles.statsRow}>
           <View style={[styles.statCard, { borderColor: '#ff7043' }]}>
