@@ -141,10 +141,10 @@ export default function AdminDrawerLayout() {
           }}
         />
         <Drawer.Screen
-          name="manage-books"
+          name="manage-content"
           options={{
-            drawerLabel: 'Manage Books',
-            title: 'Manage Books',
+            drawerLabel: 'Manage Content',
+            title: 'Manage Content',
             drawerIcon: ({ color }) => (
               <Ionicons name="book" size={30} color={color} />
             ),

@@ -203,7 +203,7 @@ export default function AdminDashboard() {
           />
         </View>
 
-        <View style={styles.releaseContainer}>
+        <View>
           <Text style={styles.releaseTitle}>Latest Release</Text>
 
           <View style={styles.releaseBox}>
@@ -373,18 +373,12 @@ const styles = StyleSheet.create({
     color: '#aaa',
     fontSize: 18,
   },
-  releaseContainer: {
-    marginTop: 30,
-    marginBottom: 40,
-  },
-
   releaseTitle: {
     color: '#43FF9BFF',
     fontSize: 26,
     marginBottom: 15,
     textAlign: 'center',
   },
-
   releaseBox: {
     backgroundColor: '#1e1e2d',
     padding: 20,
@@ -393,27 +387,24 @@ const styles = StyleSheet.create({
     borderColor: '#333',
     flexDirection: 'row',
     justifyContent: 'space-between',
+    marginBottom: 80,
   },
-
   releaseAppName: {
     color: '#fff',
     fontSize: 24,
     marginBottom: 5,
     fontWeight: '600',
   },
-
   releaseVersion: {
     color: '#ccc',
     fontSize: 20,
     marginBottom: 5,
   },
-
   releaseUpdated: {
     color: '#ccc',
     fontSize: 20,
     marginBottom: 10,
   },
-
   releaseButton: {
     backgroundColor: '#42a5f5',
     paddingVertical: 10,
@@ -421,36 +412,30 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     marginBottom: 10,
   },
-
   releaseButtonText: {
     color: '#fff',
     fontSize: 20,
     fontWeight: 'bold',
   },
-
   releaseDeveloper: {
     color: '#ccc',
     fontSize: 18,
   },
-
   releaseDevName: {
     color: '#42a5f5',
     fontWeight: 'bold',
   },
-
   releaseRights: {
     color: '#777',
     fontSize: 18,
     marginTop: 4,
   },
-
   modalBackdrop: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.6)',
     justifyContent: 'center',
     padding: 20,
   },
-
   modalContainer: {
     backgroundColor: '#121212',
     borderRadius: 20,
@@ -463,12 +448,10 @@ const styles = StyleSheet.create({
     padding: 20,
     marginBottom: 20,
   },
-
   bannerIcon: {
     fontSize: 30,
     textAlign: 'center',
   },
-
   bannerTitle: {
     fontSize: 26,
     fontWeight: 'bold',
@@ -476,21 +459,18 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: 5,
   },
-
   bannerSubtitle: {
     fontSize: 14,
     color: '#e0e0e0',
     textAlign: 'center',
     marginTop: 4,
   },
-
   timelineRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 10,
     marginTop: 10,
   },
-
   dot: {
     width: 14,
     height: 14,
@@ -500,12 +480,10 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#0f1a2b',
   },
-
   dateText: {
     color: '#fff',
     fontSize: 14,
   },
-
   changelogCard: {
     backgroundColor: '#1e1e2d',
     padding: 20,
@@ -514,34 +492,29 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#2b2b40',
   },
-
   versionTitle: {
     fontSize: 28,
     color: '#fff',
     fontWeight: 'bold',
     marginBottom: 12,
   },
-
   changelogHeading: {
     fontSize: 18,
     color: '#8ab4ff',
     marginBottom: 8,
     marginTop: 10,
   },
-
   changelogHeadingBug: {
     fontSize: 18,
     color: '#ff6ab4',
     marginBottom: 8,
     marginTop: 10,
   },
-
   bullet: {
     color: '#e0e0e0',
     fontSize: 15,
     marginBottom: 6,
   },
-
   closeBtn: {
     backgroundColor: '#1d8cf8',
     paddingVertical: 12,

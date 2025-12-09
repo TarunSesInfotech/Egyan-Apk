@@ -1,7 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import CheckBox from 'expo-checkbox';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
+  Modal,
   ScrollView,
   StyleSheet,
   Text,
@@ -34,6 +35,10 @@ export default function Announcementview() {
 
   const [newAnnouncement, setNewAnnouncement] = useState('');
   const [isImportant, setIsImportant] = useState(false);
+  const [isModalVisible, setModalVisible] = useState(false);
+  const [editText, setEditText] = useState('');
+  const [editImportant, setEditImportant] = useState(false);
+  const [editId, setEditId] = useState(null);
 
   const handleAdd = () => {
     if (!newAnnouncement.trim()) return;
@@ -51,6 +56,20 @@ export default function Announcementview() {
   const handleDelete = (id: Number) => {
     setAnnouncements(announcements.filter((a) => a.id !== id));
   };
+  const openEditModal = (item: any) => {
+    setEditId(item.id);
+    setEditText(item.text);
+    setEditImportant(item.important);
+    setModalVisible(true);
+  };
+  const handleUpdate = () => {
+    setAnnouncements(
+      announcements.map((a) =>
+        a.id === editId ? { ...a, text: editText, important: editImportant } : a
+      )
+    );
+    setModalVisible(false);
+  };
 
   return (
     <ScrollView style={styles.container}>
@@ -58,7 +77,6 @@ export default function Announcementview() {
       <Text style={styles.subtitle}>
         Manage all library announcements here.
       </Text>
-
       <View style={styles.topRow}>
         <TextInput
           style={styles.input}
@@ -81,7 +99,6 @@ export default function Announcementview() {
           <Text style={styles.addButtonText}>Add</Text>
         </TouchableOpacity>
       </View>
-
       <View style={styles.cardContainer}>
         {announcements.map((item) => (
           <View key={item.id} style={styles.card}>
@@ -99,7 +116,10 @@ export default function Announcementview() {
                 <Text style={styles.dateText}>{item.date}</Text>
               </View>
               <View style={styles.buttonRow}>
-                <TouchableOpacity style={styles.editButton}>
+                <TouchableOpacity
+                  style={styles.editButton}
+                  onPress={() => openEditModal(item)}
+                >
                   <Text style={styles.editText}>Edit</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -113,6 +133,45 @@ export default function Announcementview() {
           </View>
         ))}
       </View>
+      <Modal transparent visible={isModalVisible} animationType="fade">
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>Edit Announcement</Text>
+
+            <TextInput
+              style={styles.modalInput}
+              multiline
+              value={editText}
+              onChangeText={setEditText}
+            />
+
+            <View style={styles.modalCheckboxRow}>
+              <CheckBox
+                value={editImportant}
+                onValueChange={setEditImportant}
+                color={editImportant ? '#3b82f6' : undefined}
+              />
+              <Text style={styles.modalCheckboxLabel}>Important</Text>
+            </View>
+
+            <View style={styles.modalButtonRow}>
+              <TouchableOpacity
+                style={styles.modalCancelButton}
+                onPress={() => setModalVisible(false)}
+              >
+                <Text style={styles.modalCancelText}>Cancel</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.modalUpdateButton}
+                onPress={handleUpdate}
+              >
+                <Text style={styles.modalUpdateText}>Update</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -242,5 +301,82 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
     fontSize: 18,
+  },
+
+  //model css
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.6)',
+  },
+
+  modalBox: {
+    width: '85%',
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 20,
+  },
+
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 15,
+    color: '#000',
+  },
+
+  modalInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    padding: 12,
+    height: 100,
+    marginBottom: 10,
+    textAlignVertical: 'top',
+    fontSize: 16,
+    color: '#000',
+  },
+
+  modalCheckboxRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+
+  modalCheckboxLabel: {
+    marginLeft: 8,
+    fontSize: 16,
+    color: '#000',
+  },
+
+  modalButtonRow: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 10,
+  },
+
+  modalCancelButton: {
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#000',
+  },
+
+  modalCancelText: {
+    fontSize: 16,
+    color: '#000',
+  },
+
+  modalUpdateButton: {
+    backgroundColor: '#3b82f6',
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 6,
+  },
+  modalUpdateText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
   },
 });

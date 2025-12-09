@@ -65,16 +65,12 @@ export const repositoryOverview = async () => {
   }
 };
 
-export const addRepository = async ({ type, value, token }) => {
+export const addRepository = async ({ type, text, token }) => {
   if (!token) {
     return { success: false, message: 'Access token missing!' };
   }
-
   try {
-    const bodyData = { type, value };
-
-    console.log('📤 Sending to API:', bodyData);
-
+    const bodyData = { type, text };
     const response = await fetch(
       'https://e-gyan-9tky.onrender.com/repository',
       {
@@ -86,15 +82,10 @@ export const addRepository = async ({ type, value, token }) => {
         body: JSON.stringify(bodyData),
       }
     );
-
-    const raw = await response.text();
-    console.log('📩 RAW RESPONSE TEXT:', raw);
-
     if (!response.ok) {
       return { success: false, message: raw };
     }
-
-    return { success: true, data: JSON.parse(raw) };
+    return { success: true, data: await response.json() };
   } catch (err) {
     console.error('❌ Add Repository Error:', err);
     return { success: false, message: err.message };
@@ -102,28 +93,29 @@ export const addRepository = async ({ type, value, token }) => {
 };
 
 // Delete repositry
-// export const DeleteRepository = async (repoId) => {
-//   try {
-//     const response = await fetch(
-//       `https://e-gyan-9tky.onrender.com/repository${repoId}`,
-//       {
-//         method: 'DELETE',
-//         headers: {
-//           'Content-Type': 'application/json',
-//         },
-//       }
-//     );
+export const DeleteRepository = async (repoId, token) => {
+  try {
+    const response = await fetch(
+      `https://e-gyan-9tky.onrender.com/repository/${repoId}`,
+      {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
-//     if (!response.ok) {
-//       const errorText = await response.text();
-//       throw new Error(`HTTP ${response.status}: ${errorText}`);
-//     }
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP ${response.status}: ${errorText}`);
+    }
 
-//     return { success: true, data: await response.json() };
-//   } catch (e) {
-//     return { success: false, message: e.message };
-//   }
-// };
+    return { success: true, data: await response.json() };
+  } catch (e) {
+    return { success: false, message: e.message };
+  }
+};
 
 // Role management Api
 export const userRoleOverview = async () => {

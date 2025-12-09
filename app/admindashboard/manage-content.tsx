@@ -3,7 +3,7 @@ import ManageBookChaptersModal from '@/components/ManageBookChaptersModal';
 import UploadBookModal from '@/components/UploadBookModal';
 import WelcomeHeader from '@/components/WelcomeHeader';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Alert,
   FlatList,
@@ -34,7 +34,7 @@ interface Book {
   thumbnailProxyUrl: string;
 }
 
-export default function ManageBooks() {
+export default function ManageContent() {
   const [selectedClass, setSelectedClass] = useState<string | null>(null);
   const [studyMaterialData, setStudyMaterialData] = useState<Book[]>([]);
   const [filteredBooks, setFilteredBooks] = useState<Book[]>([]);
