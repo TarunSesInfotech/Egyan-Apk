@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -42,7 +42,6 @@ export default function RoleManagement() {
     fetchUserRole();
   }, []);
 
-  // Format users for the table
   const formattedUsers = userroleData.map((u) => ({
     id: u.id,
     name: u.username,
@@ -51,7 +50,6 @@ export default function RoleManagement() {
     status: u.isActive ? 'Active' : 'Inactive',
   }));
 
-  // Filtering and pagination
   const filteredUsers = formattedUsers.filter(
     (u) =>
       (roleFilter === 'all' ||
@@ -93,7 +91,6 @@ export default function RoleManagement() {
         <Text style={styles.welcomeText}>Hi, Welcome Mr. Admin</Text>
         <Text style={styles.sectionTitle}>Manage Role</Text>
 
-        {/* Search and Filter Row */}
         <View style={styles.searchFilterRow}>
           <TextInput
             style={styles.searchInput}
@@ -123,7 +120,6 @@ export default function RoleManagement() {
           />
         </View>
 
-        {/* Table Section */}
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <View style={{ minWidth: 800 }}>
             <View style={styles.tableHeader}>

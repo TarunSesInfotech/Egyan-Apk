@@ -21,6 +21,7 @@ import {
   addRepository,
   DeleteRepository,
   repositoryOverview,
+  UpdateRepository,
 } from '../api/adminapi/adminDashboard';
 
 export default function Repository() {
@@ -35,6 +36,10 @@ export default function Repository() {
   const [selectedValues, setSelectedValues] = useState<{ [key: string]: any }>(
     {}
   );
+  const [editData, setEditData] = useState<{
+    type?: string;
+    id?: number | null;
+  }>({});
 
   const fetchRepository = async () => {
     try {
@@ -120,6 +125,40 @@ export default function Repository() {
     }
   };
 
+  const handleUpdate = async (type: string) => {
+    const updatedValue = inputValues[type];
+
+    if (!updatedValue || !editData.id) {
+      Dialog.show({
+        type: ALERT_TYPE.DANGER,
+        title: 'Missing Fields',
+        textBody: 'Please enter value before updating.',
+        button: 'Close',
+      });
+      return;
+    }
+    const token = await AsyncStorage.getItem('token');
+    const response = await UpdateRepository({
+      updateId: editData.id,
+      value: updatedValue,
+      token,
+    });
+
+    if (response.success) {
+      Dialog.show({
+        type: ALERT_TYPE.SUCCESS,
+        title: 'Updated',
+        textBody: 'Updated Successfully!',
+        button: 'OK',
+        onHide: async () => {
+          await fetchRepository();
+          setInputValues((prev) => ({ ...prev, [type]: '' }));
+          setEditData({});
+        },
+      });
+    }
+  };
+
   const handleDelete = async (repoId: Number) => {
     Dialog.show({
       type: ALERT_TYPE.WARNING,
@@ -175,7 +214,7 @@ export default function Repository() {
             valueField="value"
             placeholder={`Select ${title}`}
             renderRightIcon={() => (
-              <Ionicons name="chevron-down" size={20} color="#fff" />
+              <Ionicons name="chevron-down" size={28} color="#fff" />
             )}
             value={selectedValues[title] || null}
             onChange={(item) => {
@@ -188,7 +227,20 @@ export default function Repository() {
               <View style={styles.dropdownItem}>
                 <Text style={styles.dropdownItemText}>{item.label}</Text>
                 <View style={{ flexDirection: 'row' }}>
-                  <TouchableOpacity style={styles.iconBtn}>
+                  <TouchableOpacity
+                    style={styles.iconBtn}
+                    onPress={() => {
+                      setInputValues((prev) => ({
+                        ...prev,
+                        [title]: item.label,
+                      }));
+
+                      setEditData({
+                        type: title,
+                        id: item.value,
+                      });
+                    }}
+                  >
                     <Ionicons name="create-outline" size={20} color="#FFD700" />
                   </TouchableOpacity>
                   <TouchableOpacity
@@ -200,29 +252,29 @@ export default function Repository() {
                 </View>
               </View>
             )}
-            flatListProps={{
-              ListFooterComponent: () => (
-                <View style={{ padding: 10, backgroundColor: '#1B1B28' }}>
-                  <View style={styles.inputRow}>
-                    <TextInput
-                      placeholder={`Add new ${title}`}
-                      placeholderTextColor="#999"
-                      style={styles.input}
-                      value={inputValues[title] || ''}
-                      onChangeText={(text) => handleInputChange(title, text)}
-                    />
-                    <TouchableOpacity
-                      style={styles.addButton}
-                      onPress={() => handleAdd(title)}
-                    >
-                      <Text style={styles.addButtonText}>Add</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              ),
-            }}
           />
         </GradientBox>
+        <View style={{ padding: 10, backgroundColor: '#1B1B28' }}>
+          <View style={styles.inputRow}>
+            <TextInput
+              placeholder={`Add new ${title}`}
+              placeholderTextColor="#999"
+              style={styles.input}
+              value={inputValues[title] || ''}
+              onChangeText={(text) => handleInputChange(title, text)}
+            />
+            <TouchableOpacity
+              style={styles.addButton}
+              onPress={() =>
+                editData.type === title ? handleUpdate(title) : handleAdd(title)
+              }
+            >
+              <Text style={styles.addButtonText}>
+                {editData.type === title ? 'Update' : 'Add'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
     );
   };

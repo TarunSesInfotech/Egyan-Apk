@@ -92,6 +92,33 @@ export const addRepository = async ({ type, text, token }) => {
   }
 };
 
+export const UpdateRepository = async ({ updateId, value, token }) => {
+  if (!token) {
+    return { success: false, message: 'Access token missing!' };
+  }
+  try {
+    const bodyData = { value };
+    const response = await fetch(
+      `https://e-gyan-9tky.onrender.com/repository/${updateId}`,
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(bodyData),
+      }
+    );
+    if (!response.ok) {
+      return { success: false, message: await response.text() };
+    }
+    return { success: true, data: await response.json() };
+  } catch (err) {
+    console.error('❌ Add Repository Error:', err);
+    return { success: false, message: err.message };
+  }
+};
+
 // Delete repositry
 export const DeleteRepository = async (repoId, token) => {
   try {

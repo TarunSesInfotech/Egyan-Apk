@@ -328,9 +328,6 @@ export default function ManageContent() {
       <UploadBookModal
         isVisible={isModalVisible}
         onClose={() => setModalVisible(false)}
-        studyMaterialData={studyMaterialData}
-        selectedClass={selectedClass}
-        setSelectedClass={setSelectedClass}
         onUploadSuccess={(bookId) => {
           setModalVisible(false);
           setSelectedBookId(bookId);
