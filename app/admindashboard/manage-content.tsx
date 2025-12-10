@@ -250,7 +250,7 @@ export default function ManageContent() {
           onPress={() => setModalVisible(true)}
         >
           <Ionicons name="cloud-upload-outline" size={24} color="#fff" />
-          <Text style={styles.uploadText}>Upload Book</Text>
+          <Text style={styles.uploadText}>Upload Content</Text>
         </TouchableOpacity>
       </View>
 
