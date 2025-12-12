@@ -1,94 +1,46 @@
+import CircularChart from '@/components/CircularChart';
+import LatestReleaseModel from '@/components/LatestReleaseModel';
+import UploadModalCredentails from '@/components/UploadModalCredentails';
 import WelcomeHeader from '@/components/WelcomeHeader';
-import React, { useEffect, useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as DocumentPicker from 'expo-document-picker';
+import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
-  Modal,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
 } from 'react-native';
-import Svg, { Circle } from 'react-native-svg';
+import {
+  ALERT_TYPE,
+  AlertNotificationRoot,
+  Dialog,
+} from 'react-native-alert-notification';
 import { AdminStats } from '../api/adminapi/adminDashboard';
-
-type CircularChartProps = {
-  value: number;
-  total: number;
-  label: string;
-  color: string;
-};
-
-const CircularChart: React.FC<CircularChartProps> = ({
-  value,
-  total,
-  label,
-  color,
-}) => {
-  const percentage = total > 0 ? (value / total) * 100 : 0;
-  const radius = 60;
-  const strokeWidth = 10;
-  const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference - (circumference * percentage) / 100;
-
-  return (
-    <View style={styles.chartBox}>
-      <Text style={styles.chartTitle}>{label}</Text>
-      <View style={{ justifyContent: 'center', alignItems: 'center' }}>
-        <Svg width={150} height={150}>
-          <Circle
-            stroke="#333"
-            fill="none"
-            cx="80"
-            cy="80"
-            r={radius}
-            strokeWidth={strokeWidth}
-          />
-          <Circle
-            stroke={color}
-            fill="none"
-            cx="80"
-            cy="80"
-            r={radius}
-            strokeWidth={strokeWidth}
-            strokeDasharray={circumference}
-            strokeDashoffset={strokeDashoffset}
-            strokeLinecap="round"
-          />
-        </Svg>
-        <View style={styles.centerText}>
-          <Text style={styles.centerValue}>{value}</Text>
-          <Text style={styles.centerLabel}>{label}</Text>
-        </View>
-      </View>
-    </View>
-  );
-};
+import { UploadCredentails } from '../api/adminapi/adminUploadCredentails';
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showChangelog, setShowChangelog] = useState(false);
 
-  const changelogData = [
-    {
-      date: 'Nov 25, 2023',
-      version: 'Version 0.0',
-      improvements: ['Added a new page with a changelog'],
-      bugfixes: [
-        'Fixed AI operation in some cases',
-        'Fixed technical problems that led to failures',
+  const [showUploadModal, setShowUploadModal] = useState(false);
+  const [file, setFile] = useState<any>(null);
+
+  const onFilePick = async () => {
+    const result = await DocumentPicker.getDocumentAsync({
+      type: [
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.ms-excel',
       ],
-      gradient: ['#2b2d42', '#1e3c72'],
-    },
-    {
-      date: 'Nov 6, 2025',
-      version: 'Version 0.0.1',
-      improvements: ['Fix bugs on manage book'],
-      bugfixes: ['Reduced data loading and updating time'],
-      gradient: ['#3a1c71', '#d76d77'],
-    },
-  ];
+      copyToCacheDirectory: true,
+    });
+    if (result.canceled) return;
+
+    setFile(result.assets[0]);
+  };
 
   const fetchStats = async () => {
     try {
@@ -97,10 +49,20 @@ export default function AdminDashboard() {
       if (response.success) {
         setStats(response.data);
       } else {
-        console.error('Error fetching Stats:', response.message);
+        Dialog.show({
+          type: ALERT_TYPE.DANGER,
+          title: 'Error fetching Stats',
+          textBody: response.message,
+          button: 'Try Again',
+        });
       }
     } catch (error: any) {
-      console.error('Error fetching Stats:', error.message);
+      Dialog.show({
+        type: ALERT_TYPE.DANGER,
+        title: 'Upload Failed',
+        textBody: error.message,
+        button: 'Try Again',
+      });
     } finally {
       setLoading(false);
     }
@@ -109,6 +71,49 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetchStats();
   }, []);
+
+  const onUpload = async () => {
+    if (!file) {
+      Dialog.show({
+        type: ALERT_TYPE.WARNING,
+        title: 'No File Selected',
+        textBody: 'Please select a PDF or Excel file.',
+        button: 'OK',
+      });
+      return;
+    }
+
+    const token = await AsyncStorage.getItem('token');
+
+    const formData = new FormData();
+    formData.append('credentialFile', {
+      uri: file.uri,
+      type:
+        file.mimeType ||
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      name: file.name,
+    } as any);
+    const result = await UploadCredentails(token, formData);
+    if (result?.message) {
+      Dialog.show({
+        type: ALERT_TYPE.SUCCESS,
+        title: 'Upload Complete',
+        textBody: 'Your file has been uploaded successfully.',
+        button: 'OK',
+        onHide: () => {
+          setShowUploadModal(false);
+          setFile(null);
+        },
+      });
+    } else {
+      Dialog.show({
+        type: ALERT_TYPE.DANGER,
+        title: 'Upload Failed',
+        textBody: result.message,
+        button: 'Try Again',
+      });
+    }
+  };
 
   if (loading) {
     return (
@@ -137,168 +142,102 @@ export default function AdminDashboard() {
   }
 
   return (
-    <View style={styles.container}>
-      <ScrollView style={styles.mainContent}>
-        <WelcomeHeader />
-        <View
-          style={{
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginTop: 20,
-            marginBottom: 20,
-          }}
-        >
-          <Text style={styles.sectionTitle}>Dashboard Overview</Text>
-
-          <TouchableOpacity
-            onPress={() => console.log('Button Pressed')}
-            style={{
-              backgroundColor: '#42a5f5',
-              paddingVertical: 6,
-              paddingHorizontal: 14,
-              borderRadius: 8,
-            }}
-          >
-            <Text style={{ color: '#fff', fontSize: 20, fontWeight: 'bold' }}>
-              Upload Credentails
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.statsRow}>
-          <View style={[styles.statCard, { borderColor: '#ff7043' }]}>
-            <Text style={styles.statTitle}>Books</Text>
-            <Text style={styles.statValue}>{stats.totalBooks}</Text>
+    <AlertNotificationRoot>
+      <View style={styles.container}>
+        <ScrollView style={styles.mainContent}>
+          <WelcomeHeader />
+          <View style={styles.headerRow}>
+            <Text style={styles.sectionTitle}>Dashboard Overview</Text>
+            <TouchableOpacity
+              onPress={() => setShowUploadModal(true)}
+              style={styles.uploadBtnMain}
+            >
+              <Text style={styles.uploadBtnMainText}>Upload Credentails</Text>
+            </TouchableOpacity>
           </View>
-          <View style={[styles.statCard, { borderColor: '#42a5f5' }]}>
-            <Text style={styles.statTitle}>PDFs</Text>
-            <Text style={styles.statValue}>{stats.totalPdf}</Text>
-          </View>
-        </View>
-
-        <View style={styles.statsRow}>
-          <View style={[styles.statCard, { borderColor: '#66bb6a' }]}>
-            <Text style={styles.statTitle}>Audios</Text>
-            <Text style={styles.statValue}>{stats.totalAudio}</Text>
-          </View>
-          <View style={[styles.statCard, { borderColor: '#ffa726' }]}>
-            <Text style={styles.statTitle}>Videos</Text>
-            <Text style={styles.statValue}>{stats.totalVideos}</Text>
-          </View>
-        </View>
-
-        <View style={styles.chartsRow}>
-          <CircularChart
-            value={stats.totalStudents}
-            total={100}
-            label="Students"
-            color="#42a5f5"
-          />
-          <CircularChart
-            value={stats.totalBooks}
-            total={300}
-            label="Books"
-            color="#66bb6a"
-          />
-        </View>
-
-        <View>
-          <Text style={styles.releaseTitle}>Latest Release</Text>
-
-          <View style={styles.releaseBox}>
-            <View>
-              <Text style={styles.releaseAppName}>eGyan</Text>
-              <Text style={styles.releaseVersion}>
-                Version: <Text style={{ color: '#43FF9BFF' }}>v0.0.0</Text>
-              </Text>
-              <Text style={styles.releaseUpdated}>
-                Last Updated:{' '}
-                <Text style={{ color: '#66bb6a' }}>12 November 2025</Text>
-              </Text>
+          <View style={styles.statsRow}>
+            <View style={[styles.statCard, { borderColor: '#ff7043' }]}>
+              <Text style={styles.statTitle}>Books</Text>
+              <Text style={styles.statValue}>{stats.totalBooks}</Text>
             </View>
-
-            <View style={{ alignItems: 'flex-end' }}>
-              <TouchableOpacity
-                style={styles.releaseButton}
-                onPress={() => setShowChangelog(true)}
-              >
-                <Text style={styles.releaseButtonText}>🚀 Latest Release</Text>
-              </TouchableOpacity>
-              <Text style={styles.releaseDeveloper}>
-                Developed by{' '}
-                <Text style={styles.releaseDevName}>SEST INFOTECH PVT LTD</Text>
-              </Text>
-              <Text style={styles.releaseRights}>
-                © 2025 All rights reserved
-              </Text>
+            <View style={[styles.statCard, { borderColor: '#42a5f5' }]}>
+              <Text style={styles.statTitle}>PDFs</Text>
+              <Text style={styles.statValue}>{stats.totalPdf}</Text>
             </View>
           </View>
-        </View>
-      </ScrollView>
-
-      <Modal
-        visible={showChangelog}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setShowChangelog(false)}
-      >
-        <View style={styles.modalBackdrop}>
-          <View style={styles.modalContainer}>
-            {/* Banner */}
-            <View style={styles.banner}>
-              <Text style={styles.bannerIcon}>🚀</Text>
-              <Text style={styles.bannerTitle}>What's New?</Text>
-              <Text style={styles.bannerSubtitle}>
-                A changelog of the latest feature releases, product updates, and
-                bug fixes.
-              </Text>
+          <View style={styles.statsRow}>
+            <View style={[styles.statCard, { borderColor: '#66bb6a' }]}>
+              <Text style={styles.statTitle}>Audios</Text>
+              <Text style={styles.statValue}>{stats.totalAudio}</Text>
             </View>
-
-            {/* Timeline Start */}
-            <ScrollView showsVerticalScrollIndicator={false}>
-              {changelogData.map((item, index) => (
-                <View key={index}>
-                  {/* Timeline Row */}
-                  <View style={styles.timelineRow}>
-                    <View style={styles.dot}></View>
-                    <Text style={styles.dateText}>{item.date}</Text>
-                  </View>
-
-                  {/* Card */}
-                  <View style={[styles.changelogCard]}>
-                    <Text style={styles.versionTitle}>{item.version}</Text>
-
-                    <Text style={styles.changelogHeading}>
-                      Improvements & Changes
-                    </Text>
-                    {item.improvements.map((imp, i) => (
-                      <Text key={i} style={styles.bullet}>
-                        • {imp}
-                      </Text>
-                    ))}
-
-                    <Text style={styles.changelogHeadingBug}>Bugfixes</Text>
-                    {item.bugfixes.map((bug, i) => (
-                      <Text key={i} style={styles.bullet}>
-                        • {bug}
-                      </Text>
-                    ))}
-                  </View>
-                </View>
-              ))}
-
-              <TouchableOpacity
-                style={styles.closeBtn}
-                onPress={() => setShowChangelog(false)}
-              >
-                <Text style={styles.closeBtnText}>Close</Text>
-              </TouchableOpacity>
-            </ScrollView>
+            <View style={[styles.statCard, { borderColor: '#ffa726' }]}>
+              <Text style={styles.statTitle}>Videos</Text>
+              <Text style={styles.statValue}>{stats.totalVideos}</Text>
+            </View>
           </View>
-        </View>
-      </Modal>
-    </View>
+          <View style={styles.chartsRow}>
+            <CircularChart
+              value={stats.totalStudents}
+              total={100}
+              label="Students"
+              color="#42a5f5"
+            />
+            <CircularChart
+              value={stats.totalBooks}
+              total={300}
+              label="Books"
+              color="#66bb6a"
+            />
+          </View>
+          <View>
+            <Text style={styles.releaseTitle}>Latest Release</Text>
+            <View style={styles.releaseBox}>
+              <View>
+                <Text style={styles.releaseAppName}>eGyan</Text>
+                <Text style={styles.releaseVersion}>
+                  Version: <Text style={{ color: '#43FF9BFF' }}>v0.0.0</Text>
+                </Text>
+                <Text style={styles.releaseUpdated}>
+                  Last Updated:{' '}
+                  <Text style={{ color: '#66bb6a' }}>12 November 2025</Text>
+                </Text>
+              </View>
+              <View style={{ alignItems: 'flex-end' }}>
+                <TouchableOpacity
+                  style={styles.releaseButton}
+                  onPress={() => setShowChangelog(true)}
+                >
+                  <Text style={styles.releaseButtonText}>
+                    🚀 Latest Release
+                  </Text>
+                </TouchableOpacity>
+                <Text style={styles.releaseDeveloper}>
+                  Developed by
+                  <Text style={styles.releaseDevName}>
+                    SEST INFOTECH PVT LTD
+                  </Text>
+                </Text>
+                <Text style={styles.releaseRights}>
+                  © 2025 All rights reserved
+                </Text>
+              </View>
+            </View>
+          </View>
+        </ScrollView>
+
+        <UploadModalCredentails
+          visible={showUploadModal}
+          file={file}
+          onFilePick={onFilePick}
+          onClose={() => setShowUploadModal(false)}
+          onUpload={onUpload}
+        />
+        <LatestReleaseModel
+          visible={showChangelog}
+          onClose={() => setShowChangelog(false)}
+        />
+      </View>
+    </AlertNotificationRoot>
   );
 }
 
@@ -312,12 +251,30 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 20,
+    marginBottom: 20,
+  },
+  uploadBtnMain: {
+    backgroundColor: '#42a5f5',
+    paddingVertical: 6,
+    paddingHorizontal: 14,
+    borderRadius: 8,
+  },
+  uploadBtnMainText: {
+    color: '#fff',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
   sectionTitle: {
     textAlign: 'center',
     color: '#43FF9BFF',
     fontSize: 24,
-    marginTop: 20,
-    marginBottom: 20,
+    marginTop: 10,
+    marginBottom: 10,
   },
   statsRow: {
     flexDirection: 'row',
@@ -345,33 +302,6 @@ const styles = StyleSheet.create({
   chartsRow: {
     flexDirection: 'column',
     marginTop: 20,
-  },
-  chartBox: {
-    width: '100%',
-    backgroundColor: '#1e1e2d',
-    padding: 20,
-    borderRadius: 12,
-    marginBottom: 20,
-    alignItems: 'center',
-  },
-  chartTitle: {
-    color: '#fff',
-    fontSize: 24,
-    marginBottom: 15,
-  },
-  centerText: {
-    position: 'absolute',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  centerValue: {
-    color: '#fff',
-    fontSize: 28,
-    fontWeight: 'bold',
-  },
-  centerLabel: {
-    color: '#aaa',
-    fontSize: 18,
   },
   releaseTitle: {
     color: '#43FF9BFF',
@@ -429,102 +359,5 @@ const styles = StyleSheet.create({
     color: '#777',
     fontSize: 18,
     marginTop: 4,
-  },
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  modalContainer: {
-    backgroundColor: '#121212',
-    borderRadius: 20,
-    padding: 15,
-    maxHeight: '90%',
-  },
-  banner: {
-    backgroundColor: '#1d8cf8',
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 20,
-  },
-  bannerIcon: {
-    fontSize: 30,
-    textAlign: 'center',
-  },
-  bannerTitle: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    color: '#fff',
-    textAlign: 'center',
-    marginTop: 5,
-  },
-  bannerSubtitle: {
-    fontSize: 14,
-    color: '#e0e0e0',
-    textAlign: 'center',
-    marginTop: 4,
-  },
-  timelineRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-    marginTop: 10,
-  },
-  dot: {
-    width: 14,
-    height: 14,
-    backgroundColor: '#1d8cf8',
-    borderRadius: 7,
-    marginRight: 10,
-    borderWidth: 2,
-    borderColor: '#0f1a2b',
-  },
-  dateText: {
-    color: '#fff',
-    fontSize: 14,
-  },
-  changelogCard: {
-    backgroundColor: '#1e1e2d',
-    padding: 20,
-    borderRadius: 15,
-    marginBottom: 30,
-    borderWidth: 1,
-    borderColor: '#2b2b40',
-  },
-  versionTitle: {
-    fontSize: 28,
-    color: '#fff',
-    fontWeight: 'bold',
-    marginBottom: 12,
-  },
-  changelogHeading: {
-    fontSize: 18,
-    color: '#8ab4ff',
-    marginBottom: 8,
-    marginTop: 10,
-  },
-  changelogHeadingBug: {
-    fontSize: 18,
-    color: '#ff6ab4',
-    marginBottom: 8,
-    marginTop: 10,
-  },
-  bullet: {
-    color: '#e0e0e0',
-    fontSize: 15,
-    marginBottom: 6,
-  },
-  closeBtn: {
-    backgroundColor: '#1d8cf8',
-    paddingVertical: 12,
-    borderRadius: 10,
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  closeBtnText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
   },
 });
