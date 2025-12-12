@@ -164,6 +164,30 @@ export const userRoleOverview = async () => {
   }
 };
 
+// user delete api
+export const userRoleDeleteApi = async (token, userId) => {
+  try {
+    const response = await fetch(
+      `https://e-gyan-9tky.onrender.com/user/delete-role/${userId}`,
+      {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return { success: true, data };
+  } catch (error) {
+    console.error('Error fetching UserRole Overview:', error.message);
+    return { success: false, message: error.message };
+  }
+};
+
 // inner chapter delete api
 export const getInnerChapterDeleteApi = async (bookId) => {
   try {
