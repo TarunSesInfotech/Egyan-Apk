@@ -144,6 +144,32 @@ export const DeleteRepository = async (repoId, token) => {
   }
 };
 
+export const updateUserRole = async (repoId, token, role, isActive) => {
+  try {
+    const bodyData = { role, isActive };
+    const response = await fetch(
+      `https://e-gyan-9tky.onrender.com/user/update-role/${repoId}`,
+      {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(bodyData),
+      }
+    );
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`HTTP ${response.status}: ${errorText}`);
+    }
+
+    return { success: true, data: await response.json() };
+  } catch (e) {
+    return { success: false, message: e.message };
+  }
+};
+
 // Role management Api
 export const userRoleOverview = async () => {
   try {

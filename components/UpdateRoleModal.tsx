@@ -18,6 +18,7 @@ export default function UpdateRoleModal({
   setSelectedUser,
   roleOptions,
   onUpdate,
+  updateLocalUserStatus,
 }: any) {
   return (
     <Modal isVisible={isVisible} onBackdropPress={onClose}>
@@ -30,7 +31,7 @@ export default function UpdateRoleModal({
             <TextInput
               style={[
                 styles.modalInput,
-                { backgroundColor: '#3a3a46', color: '#ccc' },
+                { backgroundColor: '#3a3a46', color: '#fff' },
               ]}
               value={selectedUser.name}
               editable={false}
@@ -43,11 +44,7 @@ export default function UpdateRoleModal({
               valueField="value"
               value={newRole}
               onChange={(item) => setNewRole(item.value)}
-              placeholder="Select Role"
-              placeholderStyle={{ color: '#999' }}
               selectedTextStyle={{ color: '#fff' }}
-              itemTextStyle={{ color: '#000' }}
-              containerStyle={styles.dropdownContainer}
             />
             <Text style={styles.modalLabel}>Status</Text>
             <Dropdown
@@ -58,15 +55,16 @@ export default function UpdateRoleModal({
               ]}
               labelField="label"
               valueField="value"
-              value={selectedUser.status.toLowerCase()}
-              onChange={(item) =>
-                setSelectedUser({ ...selectedUser, status: item.label })
-              }
-              placeholder="Select Status"
-              placeholderStyle={{ color: '#999' }}
+              value={selectedUser.isActive ? 'active' : 'inactive'}
+              onChange={(item) => {
+                const active = item.value === 'active';
+                setSelectedUser({
+                  ...selectedUser,
+                  isActive: active,
+                });
+                updateLocalUserStatus(selectedUser.id, active);
+              }}
               selectedTextStyle={{ color: '#fff' }}
-              itemTextStyle={{ color: '#000' }}
-              containerStyle={styles.dropdownContainer}
             />
             <View style={styles.modalButtonRow}>
               <TouchableOpacity
@@ -122,11 +120,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   modalDropdown: {
-    backgroundColor: '#1a1a24',
+    backgroundColor: '#3a3a46',
     borderRadius: 6,
     height: 50,
     marginBottom: 20,
     paddingHorizontal: 10,
+    color: '#fff',
   },
   modalButtonRow: {
     flexDirection: 'row',

@@ -1,6 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import React from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -50,21 +49,21 @@ export default function ReportsOverview() {
         <TouchableOpacity
           style={[styles.exportButton, { backgroundColor: '#2ecc71' }]}
         >
-          <Ionicons name="document-text-outline" size={18} color="#fff" />
+          <Ionicons name="document-text-outline" size={24} color="#fff" />
           <Text style={styles.exportText}>Export CSV</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.exportButton, { backgroundColor: '#e74c3c' }]}
         >
-          <Ionicons name="document-text-outline" size={18} color="#fff" />
+          <Ionicons name="document-text-outline" size={24} color="#fff" />
           <Text style={styles.exportText}>Export PDF</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
           style={[styles.exportButton, { backgroundColor: '#f1c40f' }]}
         >
-          <Ionicons name="print-outline" size={18} color="#000" />
+          <Ionicons name="print-outline" size={24} color="#000" />
           <Text style={[styles.exportText, { color: '#000' }]}>Print</Text>
         </TouchableOpacity>
       </View>
@@ -87,7 +86,7 @@ export default function ReportsOverview() {
                   ? 'calendar-outline'
                   : 'chevron-down-outline'
               }
-              size={18}
+              size={24}
               color="#aaa"
             />
           </TouchableOpacity>
@@ -102,7 +101,7 @@ export default function ReportsOverview() {
           end={{ x: 1, y: 1 }}
           style={styles.card}
         >
-          <Ionicons name="book-outline" size={24} color="#fff" />
+          <Ionicons name="book-outline" size={28} color="#fff" />
           <View>
             <Text style={styles.cardLabel}>Total Books Completed</Text>
             <Text style={styles.cardValue}>0</Text>
@@ -115,7 +114,7 @@ export default function ReportsOverview() {
           end={{ x: 1, y: 1 }}
           style={styles.card}
         >
-          <Ionicons name="people-outline" size={24} color="#fff" />
+          <Ionicons name="people-outline" size={28} color="#fff" />
           <View>
             <Text style={styles.cardLabel}>Active Students</Text>
             <Text style={styles.cardValue}>47</Text>
@@ -128,7 +127,7 @@ export default function ReportsOverview() {
           end={{ x: 1, y: 1 }}
           style={styles.card}
         >
-          <Ionicons name="time-outline" size={24} color="#fff" />
+          <Ionicons name="time-outline" size={28} color="#fff" />
           <View>
             <Text style={styles.cardLabel}>Pending Reviews</Text>
             <Text style={styles.cardValue}>36</Text>
@@ -140,23 +139,23 @@ export default function ReportsOverview() {
       <View style={styles.tableContainer}>
         <Text style={styles.tableTitle}>Detailed Class & Student Report</Text>
 
-        {/* Table Header */}
+        {/* TABLE HEADER */}
         <View style={styles.tableHeader}>
-          {[
-            'Class',
-            'Student',
-            'Books Completed',
-            'Reading Hours',
-            'Last Activity',
-            'Status',
-          ].map((header, index) => (
-            <Text key={index} style={styles.headerText}>
-              {header}
-            </Text>
-          ))}
+          <Text style={[styles.headerText, styles.colClass]}>Class</Text>
+          <Text style={[styles.headerText, styles.colStudent]}>Student</Text>
+          <Text style={[styles.headerText, styles.colBooks]}>
+            Books Completed
+          </Text>
+          <Text style={[styles.headerText, styles.colHours]}>
+            Reading Hours
+          </Text>
+          <Text style={[styles.headerText, styles.colActivity]}>
+            Last Activity
+          </Text>
+          <Text style={[styles.headerText, styles.colStatus]}>Status</Text>
         </View>
 
-        {/* Table Rows */}
+        {/* TABLE ROWS */}
         {tableData.map((row, index) => (
           <View
             key={index}
@@ -165,18 +164,24 @@ export default function ReportsOverview() {
               { backgroundColor: index % 2 === 0 ? '#1e1e1e' : '#151515' },
             ]}
           >
-            <Text style={styles.cellText}>{row.class}</Text>
-            <Text style={styles.cellText}>{row.student}</Text>
-            <Text style={styles.cellText}>{row.books}</Text>
-            <Text style={styles.cellText}>{row.hours}</Text>
-            <Text style={styles.cellText}>{row.lastActivity}</Text>
+            <Text style={[styles.cellText, styles.colClass]}>{row.class}</Text>
+
+            <Text style={[styles.cellText, styles.colStudent]}>
+              {row.student}
+            </Text>
+
+            <Text style={[styles.cellText, styles.colBooks]}>{row.books}</Text>
+
+            <Text style={[styles.cellText, styles.colHours]}>{row.hours}</Text>
+
+            <Text style={[styles.cellText, styles.colActivity]}>
+              {row.lastActivity}
+            </Text>
+
             <View
               style={[
                 styles.statusBadge,
-                {
-                  backgroundColor:
-                    row.status === 'Active' ? '#2ecc71' : '#e74c3c',
-                },
+                row.status === 'Active' ? styles.active : styles.inactive,
               ]}
             >
               <Text style={styles.statusText}>{row.status}</Text>
@@ -202,13 +207,12 @@ const styles = StyleSheet.create({
   subtitle: {
     color: '#fff',
     fontSize: 18,
-    marginTop: 10,
+    marginTop: 8,
     marginBottom: 20,
   },
   exportContainer: {
     flexDirection: 'row',
     justifyContent: 'flex-end',
-    marginTop: 10,
     gap: 10,
   },
   exportButton: {
@@ -221,14 +225,13 @@ const styles = StyleSheet.create({
   },
   exportText: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: 18,
     fontWeight: '600',
   },
   filterContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 10,
-    justifyContent: 'space-between',
     marginTop: 25,
   },
   dropdown: {
@@ -240,23 +243,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 10,
     minWidth: '47%',
-    marginBottom: 10,
   },
   dropdownText: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: 18,
   },
   cardsContainer: {
     marginTop: 15,
     flexDirection: 'row',
-    justifyContent: 'space-between',
     flexWrap: 'wrap',
     gap: 10,
   },
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-start',
     borderRadius: 12,
     padding: 16,
     flex: 1,
@@ -265,63 +265,86 @@ const styles = StyleSheet.create({
   },
   cardLabel: {
     color: '#fff',
-    fontSize: 13,
+    fontSize: 18,
   },
   cardValue: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
   },
   tableContainer: {
     backgroundColor: '#1a1a1a',
     borderRadius: 12,
-    padding: 15,
-    marginTop: 30,
+    padding: 12,
   },
   tableTitle: {
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 10,
+    marginBottom: 12,
   },
+
+  /* HEADER */
   tableHeader: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    backgroundColor: '#0d0d0d',
     paddingVertical: 10,
-    paddingHorizontal: 8,
+    backgroundColor: '#222',
     borderRadius: 8,
+    marginBottom: 8,
   },
   headerText: {
     color: '#ccc',
+    fontSize: 16,
     fontWeight: 'bold',
-    flex: 1,
-    textAlign: 'center',
-    fontSize: 13,
   },
+
+  /* ROW */
   tableRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     paddingVertical: 10,
-    borderBottomWidth: 0.3,
+    borderBottomWidth: 0.5,
     borderBottomColor: '#333',
   },
   cellText: {
     color: '#fff',
-    flex: 1,
-    textAlign: 'center',
-    fontSize: 13,
+    fontSize: 16,
   },
+
+  colClass: {
+    width: 60,
+  },
+  colStudent: {
+    width: 150,
+  },
+  colBooks: {
+    width: 160,
+  },
+  colHours: {
+    width: 160,
+  },
+  colActivity: {
+    width: 120,
+  },
+  colStatus: {
+    width: 80,
+    textAlign: 'center',
+  },
+
   statusBadge: {
-    borderRadius: 4,
-    paddingHorizontal: 6,
-    paddingVertical: 3,
-    alignSelf: 'center',
+    width: 80,
+    borderRadius: 6,
+    paddingVertical: 4,
+    alignItems: 'center',
   },
   statusText: {
     color: '#fff',
-    fontSize: 12,
+    fontSize: 16,
     fontWeight: '600',
-    textAlign: 'center',
+  },
+  active: {
+    backgroundColor: '#2ecc71',
+  },
+  inactive: {
+    backgroundColor: '#e74c3c',
   },
 });

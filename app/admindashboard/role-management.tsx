@@ -17,6 +17,7 @@ import {
 } from 'react-native-alert-notification';
 import { Dropdown } from 'react-native-element-dropdown';
 import {
+  updateUserRole,
   userRoleDeleteApi,
   userRoleOverview,
 } from '../api/adminapi/adminDashboard';
@@ -50,6 +51,12 @@ export default function RoleManagement() {
   useEffect(() => {
     fetchUserRole();
   }, []);
+
+  const updateLocalUserStatus = (id: any, isActive: boolean) => {
+    setUserRoleData((prev) =>
+      prev.map((u) => (u.id === id ? { ...u, isActive } : u))
+    );
+  };
 
   const handleDeleteUser = async (userId: any) => {
     Dialog.show({
@@ -85,7 +92,7 @@ export default function RoleManagement() {
     name: u.username,
     email: u.email,
     role: u.role ? u.role.charAt(0).toUpperCase() + u.role.slice(1) : 'N/A',
-    status: u.isActive ? 'Active' : 'Inactive',
+    isActive: u.isActive,
   }));
 
   const filteredUsers = formattedUsers.filter(
@@ -107,12 +114,45 @@ export default function RoleManagement() {
     }
   };
 
-  const toggleModal = (user?: any) => {
+  const toggleModal = (user: any = null) => {
     if (user) {
-      setSelectedUser(user);
+      setSelectedUser({
+        ...user,
+        isActive: user.isActive,
+      });
       setNewRole(user.role.toLowerCase());
     }
     setModalVisible(!isModalVisible);
+  };
+  const handleUpdateUser = async () => {
+    if (!selectedUser) return;
+
+    const token = await AsyncStorage.getItem('token');
+    const res = await updateUserRole(
+      selectedUser.id,
+      token,
+      newRole,
+      selectedUser.isActive
+    );
+    if (res.success) {
+      Dialog.show({
+        type: ALERT_TYPE.SUCCESS,
+        title: 'Updated',
+        textBody: 'User role updated successfully!',
+        button: 'OK',
+        onHide: () => {
+          fetchUserRole();
+          setModalVisible(false);
+        },
+      });
+    } else {
+      Dialog.show({
+        type: ALERT_TYPE.DANGER,
+        title: 'Error',
+        textBody: res.message,
+        button: 'Close',
+      });
+    }
   };
 
   const roleOptions = [
@@ -179,65 +219,70 @@ export default function RoleManagement() {
                 </Text>
               </View>
 
-              {currentUsers.map((user) => (
-                <View key={user.id} style={styles.tableRow}>
-                  <Text
-                    style={[styles.tableCell, styles.colName]}
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                  >
-                    {user.name}
-                  </Text>
-                  <Text
-                    style={[styles.tableCell, styles.colEmail]}
-                    numberOfLines={1}
-                    ellipsizeMode="tail"
-                  >
-                    {user.email}
-                  </Text>
-                  <Text style={[styles.tableCell, styles.colRole]}>
-                    {user.role}
-                  </Text>
-                  <View style={[styles.statusContainer, styles.colStatus]}>
+              {currentUsers.map((user) => {
+                return (
+                  <View key={user.id} style={styles.tableRow}>
                     <Text
-                      style={[
-                        styles.activeStatus,
-                        {
-                          backgroundColor:
-                            user.status === 'Active' ? '#00c853' : '#ff4d4d',
-                        },
-                      ]}
+                      style={[styles.tableCell, styles.colName]}
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
                     >
-                      {user.status}
+                      {user.name}
                     </Text>
-                  </View>
-                  <View style={[styles.actionsContainer, styles.colActions]}>
-                    <TouchableOpacity
-                      style={styles.actionButton}
-                      onPress={() => toggleModal(user)}
+                    <Text
+                      style={[styles.tableCell, styles.colEmail]}
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
                     >
-                      <Ionicons
-                        name="create-outline"
-                        size={20}
-                        color="#4da3ff"
-                      />
-                      <Text style={styles.changeRoleText}>Change</Text>
-                    </TouchableOpacity>
+                      {user.email}
+                    </Text>
+                    <Text style={[styles.tableCell, styles.colRole]}>
+                      {user.role}
+                    </Text>
 
-                    <TouchableOpacity
-                      style={styles.actionButton}
-                      onPress={() => handleDeleteUser(user.id)}
-                    >
-                      <Ionicons
-                        name="trash-outline"
-                        size={20}
-                        color="#ff4d4d"
-                      />
-                      <Text style={styles.deleteText}>Delete</Text>
-                    </TouchableOpacity>
+                    <View style={[styles.statusContainer, styles.colStatus]}>
+                      <Text
+                        style={[
+                          styles.activeStatus,
+                          {
+                            backgroundColor: user.isActive
+                              ? '#00c853'
+                              : '#ff4d4d',
+                          },
+                        ]}
+                      >
+                        {user.isActive ? 'Active' : 'Inactive'}
+                      </Text>
+                    </View>
+
+                    <View style={[styles.actionsContainer, styles.colActions]}>
+                      <TouchableOpacity
+                        style={styles.actionButton}
+                        onPress={() => toggleModal(user)}
+                      >
+                        <Ionicons
+                          name="create-outline"
+                          size={20}
+                          color="#4da3ff"
+                        />
+                        <Text style={styles.changeRoleText}>Change</Text>
+                      </TouchableOpacity>
+
+                      <TouchableOpacity
+                        style={styles.actionButton}
+                        onPress={() => handleDeleteUser(user.id)}
+                      >
+                        <Ionicons
+                          name="trash-outline"
+                          size={20}
+                          color="#ff4d4d"
+                        />
+                        <Text style={styles.deleteText}>Delete</Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
-                </View>
-              ))}
+                );
+              })}
             </View>
           </ScrollView>
 
@@ -297,12 +342,8 @@ export default function RoleManagement() {
           setNewRole={setNewRole}
           setSelectedUser={setSelectedUser}
           roleOptions={roleOptions}
-          onUpdate={() => {
-            console.log(
-              `Updated ${selectedUser.name}: role=${newRole}, status=${selectedUser.status}`
-            );
-            setModalVisible(false);
-          }}
+          onUpdate={handleUpdateUser}
+          updateLocalUserStatus={updateLocalUserStatus}
         />
       </View>
     </AlertNotificationRoot>
