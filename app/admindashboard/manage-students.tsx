@@ -1,7 +1,9 @@
 import StudentCard from '@/components/StudentCard';
 import StudentModal from '@/components/StudentModal';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useEffect, useState } from 'react';
+import * as FileSystem from 'expo-file-system/legacy';
+import * as Sharing from 'expo-sharing';
+import { useEffect, useState } from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -10,11 +12,13 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import * as XLSX from 'xlsx';
 import { userStudentProgress } from '../api/adminapi/adminDashboard';
 
 export type Student = {
   id: number;
   name: string;
+  email?: string;
   avg: number;
   books: {
     name: string;
@@ -40,11 +44,13 @@ export default function ManageStudents() {
         (s: {
           id: number;
           username: string;
+          email: string;
           averageProgress?: number;
           progressByBook: { bookName?: string; progress?: number }[];
         }) => ({
           id: s.id,
           name: s.username,
+          email: s.email ?? '',
           avg: s.averageProgress ?? 0,
           books: s.progressByBook.map((b, index) => ({
             name: b.bookName || `Book ${index + 1}`,
@@ -122,6 +128,36 @@ export default function ManageStudents() {
     setSortVisible(false);
   };
 
+  const exportToExcel = async () => {
+    try {
+      const excelData = students.map((s) => ({
+        ID: s.id,
+        Name: s.name,
+        Email: s.email,
+        AverageProgress: s.avg,
+      }));
+
+      const worksheet = XLSX.utils.json_to_sheet(excelData);
+      const workbook = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(workbook, worksheet, 'Students');
+
+      const excelBase64 = XLSX.write(workbook, {
+        type: 'base64',
+        bookType: 'xlsx',
+      });
+
+      const fileUri = FileSystem.documentDirectory + 'students.xlsx';
+
+      await FileSystem.writeAsStringAsync(fileUri, excelBase64, {
+        encoding: 'base64',
+      });
+
+      await Sharing.shareAsync(fileUri);
+    } catch (error) {
+      console.log('Excel export error:', error);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <ScrollView style={styles.mainContent}>
@@ -130,7 +166,10 @@ export default function ManageStudents() {
           <Text style={styles.sectionTitle}>Students Progress</Text>
 
           <View style={styles.rightControls}>
-            <TouchableOpacity style={styles.exportButton}>
+            <TouchableOpacity
+              style={styles.exportButton}
+              onPress={exportToExcel}
+            >
               <Ionicons name="download-outline" size={24} color="#fff" />
               <Text style={styles.exportText}>Export CSV</Text>
             </TouchableOpacity>
