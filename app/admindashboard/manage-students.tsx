@@ -178,7 +178,7 @@ export default function ManageStudents() {
 
         <View style={styles.controlsRow}>
           <View style={styles.searchContainer}>
-            <Ionicons name="search" size={24} color="#bbb" />
+            <Ionicons name="search" size={28} color="#bbb" />
             <TextInput
               placeholder="Search name, id, or keywords..."
               placeholderTextColor="#999"
@@ -315,24 +315,24 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#1e1e1e',
     borderRadius: 8,
-    paddingHorizontal: 10,
-    height: 40,
+    paddingHorizontal: 14,
+    height: 50,
     flex: 1,
     minWidth: 200,
   },
   searchInput: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 20,
     marginLeft: 6,
     flex: 1,
   },
   dropdownRow: {
     position: 'relative',
     width: 170,
-  },
+  }, 
   dropdown: {
     backgroundColor: '#1e1e1e',
-    paddingHorizontal: 12,
+    paddingHorizontal: 15,
     paddingVertical: 8,
     borderRadius: 8,
   },
