@@ -250,7 +250,7 @@ export default function Announcementview() {
           editText={editText}
           setEditText={setEditText}
           onClose={() => setModalVisible(false)}
-          onUpdate={() => handleUpdateAnnouncement}
+          onUpdate={() => handleUpdateAnnouncement()}
         />
       </ScrollView>
     </AlertNotificationRoot>

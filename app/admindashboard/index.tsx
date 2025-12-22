@@ -212,7 +212,7 @@ export default function AdminDashboard() {
                   </Text>
                 </TouchableOpacity>
                 <Text style={styles.releaseDeveloper}>
-                  Developed by
+                  Developed by &nbsp;
                   <Text style={styles.releaseDevName}>
                     SEST INFOTECH PVT LTD
                   </Text>

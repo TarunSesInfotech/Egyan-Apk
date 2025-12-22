@@ -1,5 +1,5 @@
 import { currentUserApi } from '@/app/api/studentapi/studentDashboardApi';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { StyleSheet, Text } from 'react-native';
 
 export default function WelcomeHeader() {

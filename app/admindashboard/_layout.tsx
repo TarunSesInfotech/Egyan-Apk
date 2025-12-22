@@ -47,32 +47,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
       <View style={{ flex: 1 }}>
         <DrawerItemList {...props} />
       </View>
-      <DrawerItem
-        label="Notifications"
-        labelStyle={{ color: '#fff', fontSize: 24 }}
-        icon={() => <Ionicons name="notifications" size={30} color={'#fff'} />}
-        onPress={() => {}}
-        style={{
-          marginBottom: 16,
-          backgroundColor: '#3572ef',
-          borderRadius: 12,
-          height: 70,
-          justifyContent: 'center',
-        }}
-      />
-      <DrawerItem
-        label="Profile Settings"
-        labelStyle={{ color: '#fff', fontSize: 24 }}
-        icon={() => <Ionicons name="person-circle" size={30} color={'#fff'} />}
-        onPress={() => {}}
-        style={{
-          marginBottom: 16,
-          backgroundColor: '#3572ef',
-          borderRadius: 12,
-          height: 70,
-          justifyContent: 'center',
-        }}
-      />
+
       <DrawerItem
         label="Logout"
         labelStyle={{ color: '#fff', fontSize: 24 }}
@@ -188,6 +163,48 @@ export default function AdminDrawerLayout() {
             title: 'Role Management',
             drawerIcon: ({ color }) => (
               <Ionicons name="shield-checkmark" size={30} color={color} />
+            ),
+          }}
+        />
+        <Drawer.Screen
+          name="notifications"
+          options={{
+            drawerLabel: 'Notifications',
+            title: 'Notifications',
+            drawerLabelStyle: {
+              color: '#fff',
+              fontSize: 24,
+            },
+            drawerItemStyle: {
+              marginTop: 490,
+              backgroundColor: '#3572ef',
+              borderRadius: 12,
+              height: 70,
+              justifyContent: 'center',
+            },
+            drawerIcon: () => (
+              <Ionicons name="notifications" size={30} color="#fff" />
+            ),
+          }}
+        />
+        <Drawer.Screen
+          name="profile-settings"
+          options={{
+            drawerLabel: 'Profile Settings',
+            title: 'Profile Settings',
+            drawerLabelStyle: {
+              color: '#fff',
+              fontSize: 24,
+            },
+            drawerItemStyle: {
+              marginTop: 12,
+              backgroundColor: '#3572ef',
+              borderRadius: 12,
+              height: 70,
+              justifyContent: 'center',
+            },
+            drawerIcon: ({ color }) => (
+              <Ionicons name="person-circle" size={30} color={color} />
             ),
           }}
         />

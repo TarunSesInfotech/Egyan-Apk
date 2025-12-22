@@ -75,10 +75,10 @@ export const DeleteAnnouncement = async (announcementId, token) => {
     return { success: false, message: e.message };
   }
 };
-export const UpdateAnnouncement = async (announcementId, token, text) => {
+export const UpdateAnnouncement = async (editId, token, text) => {
   try {
     const response = await fetch(
-      `https://e-gyan-9tky.onrender.com/annoucements/${announcementId}`,
+      `https://e-gyan-9tky.onrender.com/annoucements/${editId}`,
       {
         method: 'PATCH',
         headers: {

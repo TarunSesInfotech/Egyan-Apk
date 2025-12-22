@@ -1,6 +1,5 @@
-import WelcomeHeader from '@/components/WelcomeHeader';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -32,7 +31,6 @@ export default function SchoolOverview() {
 
   return (
     <ScrollView style={styles.container}>
-      <WelcomeHeader />
       <Text style={styles.title}>School Overview</Text>
       <Text style={styles.subtitle}>
         Track your school's usage and digital library sync.
