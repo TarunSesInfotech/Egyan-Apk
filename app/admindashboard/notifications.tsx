@@ -147,12 +147,24 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     paddingRight: 50,
   },
-  colUser: { width: '18%' },
-  colMsg: { width: '30%' },
-  colStatus: { width: '32%' },
-  colAction: { width: '20%' },
-  col20: { width: '20%' },
-  col15: { width: '15%' },
+  colUser: {
+    width: '18%',
+  },
+  colMsg: {
+    width: '30%',
+  },
+  colStatus: {
+    width: '32%',
+  },
+  colAction: {
+    width: '20%',
+  },
+  col20: {
+    width: '20%',
+  },
+  col15: {
+    width: '15%',
+  },
   picker: {
     width: '100%',
     height: 40,
