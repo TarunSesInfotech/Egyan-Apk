@@ -147,7 +147,7 @@ export default function AdminDashboard() {
         <ScrollView style={styles.mainContent}>
           <WelcomeHeader />
           <View style={styles.headerRow}>
-            <Text style={styles.sectionTitle}>Dashboard Overview</Text>
+            <Text style={styles.sectionTitle}>Overview</Text>
             <TouchableOpacity
               onPress={() => setShowUploadModal(true)}
               style={styles.uploadBtnMain}

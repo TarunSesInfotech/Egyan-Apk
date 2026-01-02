@@ -55,21 +55,21 @@ export default function SchoolOverview() {
         </Text>
 
         <View style={styles.statsRow}>
-          <View style={[styles.statCard, { borderColor: '#ff7043' }]}>
+          <View style={[styles.statCard, { backgroundColor: '#ff7043' }]}>
             <Text style={styles.statTitle}>Total Teachers</Text>
             <Text style={styles.statValue}>{overview?.totalTeachers}</Text>
           </View>
-          <View style={[styles.statCard, { borderColor: '#42a5f5' }]}>
+          <View style={[styles.statCard, { backgroundColor: '#42a5f5' }]}>
             <Text style={styles.statTitle}>Total Students</Text>
             <Text style={styles.statValue}>{overview?.totalStudents}</Text>
           </View>
         </View>
         <View style={styles.statsRow}>
-          <View style={[styles.statCard, { borderColor: '#66bb6a' }]}>
+          <View style={[styles.statCard, { backgroundColor: '#66bb6a' }]}>
             <Text style={styles.statTitle}>Total Classes</Text>
             <Text style={styles.statValue}>{overview?.totalClasses}</Text>
           </View>
-          <View style={[styles.statCard, { borderColor: '#fdd835' }]}>
+          <View style={[styles.statCard, { backgroundColor: '#fdd835' }]}>
             <Text style={styles.statTitle}>Total Books</Text>
             <Text style={styles.statValue}>{overview?.totalBooks}</Text>
           </View>
@@ -234,11 +234,9 @@ const styles = StyleSheet.create({
   },
   statCard: {
     flex: 1,
-    backgroundColor: '#1e1e2d',
     padding: 16,
-    borderRadius: 12,
+    borderRadius: 15,
     marginBottom: 12,
-    borderLeftWidth: 14,
     marginRight: 8,
   },
   statTitle: {

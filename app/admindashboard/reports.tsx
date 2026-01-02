@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useState } from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -9,6 +10,28 @@ import {
 } from 'react-native';
 
 export default function ReportsOverview() {
+  type FilterKey = 'class' | 'subject' | 'language' | 'level' | 'from' | 'to';
+
+  const [filters, setFilters] = useState<Record<FilterKey, string>>({
+    class: 'All Classes',
+    subject: 'All Subjects',
+    language: 'All Languages',
+    level: 'All Levels',
+    from: 'dd-mm-yyyy',
+    to: 'dd-mm-yyyy',
+  });
+
+  const [open, setOpen] = useState<string | null>(null);
+
+  const filterOptions = {
+    class: ['All Classes', '10', '9', '8'],
+    subject: ['All Subjects', 'Math', 'Science', 'English'],
+    language: ['All Languages', 'English', 'Hindi'],
+    level: ['All Levels', 'Beginner', 'Intermediate', 'Advanced'],
+    from: ['01-01-2025', '05-01-2025', '10-01-2025'],
+    to: ['15-01-2025', '20-01-2025', '25-01-2025'],
+  };
+
   const tableData = [
     {
       class: '10',
@@ -38,13 +61,11 @@ export default function ReportsOverview() {
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>Reports Overview</Text>
       <Text style={styles.subtitle}>
         Analyze student reading activity, book completion, and engagement
         metrics.
       </Text>
 
-      {/* Export Buttons */}
       <View style={styles.exportContainer}>
         <TouchableOpacity
           style={[styles.exportButton, { backgroundColor: '#2ecc71' }]}
@@ -67,29 +88,43 @@ export default function ReportsOverview() {
           <Text style={[styles.exportText, { color: '#000' }]}>Print</Text>
         </TouchableOpacity>
       </View>
-
-      {/* Filter Section */}
       <View style={styles.filterContainer}>
-        {[
-          'All Classes',
-          'All Subjects',
-          'All Languages',
-          'All Levels',
-          'dd-mm-yyyy',
-          'dd-mm-yyyy',
-        ].map((item, index) => (
-          <TouchableOpacity style={styles.dropdown} key={index}>
-            <Text style={styles.dropdownText}>{item}</Text>
-            <Ionicons
-              name={
-                item.includes('dd')
-                  ? 'calendar-outline'
-                  : 'chevron-down-outline'
-              }
-              size={24}
-              color="#aaa"
-            />
-          </TouchableOpacity>
+        {(Object.keys(filters) as FilterKey[]).map((key) => (
+          <View key={key}>
+            <TouchableOpacity
+              style={styles.dropdown}
+              onPress={() => setOpen(open === key ? null : key)}
+            >
+              <Text style={styles.dropdownText}>{filters[key]}</Text>
+
+              <Ionicons
+                name={
+                  key === 'from' || key === 'to'
+                    ? 'calendar-outline'
+                    : 'chevron-down-outline'
+                }
+                size={24}
+                color="#aaa"
+              />
+            </TouchableOpacity>
+
+            {open === key && (
+              <View style={styles.dropdownMenu}>
+                {filterOptions[key as FilterKey].map((option, i) => (
+                  <TouchableOpacity
+                    key={i}
+                    style={styles.dropdownItem}
+                    onPress={() => {
+                      setFilters({ ...filters, [key]: option });
+                      setOpen(null);
+                    }}
+                  >
+                    <Text style={styles.dropdownText}>{option}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            )}
+          </View>
         ))}
       </View>
 
@@ -199,14 +234,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#121212',
     padding: 20,
   },
-  title: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: 'bold',
-  },
   subtitle: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 22,
     marginTop: 8,
     marginBottom: 20,
   },
@@ -276,6 +306,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#1a1a1a',
     borderRadius: 12,
     padding: 12,
+    marginTop: 14,
   },
   tableTitle: {
     color: '#fff',
@@ -346,5 +377,18 @@ const styles = StyleSheet.create({
   },
   inactive: {
     backgroundColor: '#e74c3c',
+  },
+  dropdownMenu: {
+    backgroundColor: '#1e1e1e',
+    borderRadius: 8,
+    marginTop: 4,
+    paddingVertical: 6,
+  },
+
+  dropdownItem: {
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderBottomWidth: 0.5,
+    borderBottomColor: '#333',
   },
 });
