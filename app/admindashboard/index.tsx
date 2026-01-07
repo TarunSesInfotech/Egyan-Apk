@@ -2,11 +2,13 @@ import CircularChart from '@/components/CircularChart';
 import LatestReleaseModel from '@/components/LatestReleaseModel';
 import UploadModalCredentails from '@/components/UploadModalCredentails';
 import WelcomeHeader from '@/components/WelcomeHeader';
+import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as DocumentPicker from 'expo-document-picker';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
+  Linking,
   ScrollView,
   StyleSheet,
   Text,
@@ -136,7 +138,9 @@ export default function AdminDashboard() {
           { justifyContent: 'center', alignItems: 'center' },
         ]}
       >
-        <Text style={{ color: '#fff' }}>Failed to load stats</Text>
+        <Text style={{ color: '#fff' }}>
+          Login user token has expire please again login{' '}
+        </Text>
       </View>
     );
   }
@@ -152,27 +156,34 @@ export default function AdminDashboard() {
               onPress={() => setShowUploadModal(true)}
               style={styles.uploadBtnMain}
             >
-              <Text style={styles.uploadBtnMainText}>Upload Credentails</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text style={styles.uploadBtnMainText}>Upload Credentails</Text>
+                <Ionicons
+                  name="add"
+                  size={24}
+                  style={{ color: 'white', marginLeft: 2 }}
+                />
+              </View>
             </TouchableOpacity>
           </View>
           <View style={styles.statsRow}>
             <View style={[styles.statCard, { borderColor: '#ff7043' }]}>
               <Text style={styles.statTitle}>Books</Text>
-              <Text style={styles.statValue}>{stats.totalBooks}</Text>
+              <Text style={styles.statValue}>{stats.totalBooks} items</Text>
             </View>
             <View style={[styles.statCard, { borderColor: '#42a5f5' }]}>
               <Text style={styles.statTitle}>PDFs</Text>
-              <Text style={styles.statValue}>{stats.totalPdf}</Text>
+              <Text style={styles.statValue}>{stats.totalPdf} items</Text>
             </View>
           </View>
           <View style={styles.statsRow}>
             <View style={[styles.statCard, { borderColor: '#66bb6a' }]}>
               <Text style={styles.statTitle}>Audios</Text>
-              <Text style={styles.statValue}>{stats.totalAudio}</Text>
+              <Text style={styles.statValue}>{stats.totalAudio} items</Text>
             </View>
             <View style={[styles.statCard, { borderColor: '#ffa726' }]}>
               <Text style={styles.statTitle}>Videos</Text>
-              <Text style={styles.statValue}>{stats.totalVideos}</Text>
+              <Text style={styles.statValue}>{stats.totalVideos} items</Text>
             </View>
           </View>
           <View style={styles.chartsRow}>
@@ -211,12 +222,19 @@ export default function AdminDashboard() {
                     🚀 Latest Release
                   </Text>
                 </TouchableOpacity>
-                <Text style={styles.releaseDeveloper}>
-                  Developed by &nbsp;
-                  <Text style={styles.releaseDevName}>
-                    SEST INFOTECH PVT LTD
-                  </Text>
-                </Text>
+
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <Text style={styles.releaseDeveloper}>⚙️ Developed by </Text>
+
+                  <TouchableOpacity
+                    onPress={() => Linking.openURL('https://sestinfotech.com/')}
+                  >
+                    <Text style={styles.releaseDevName}>
+                      SEST INFOTECH PVT LTD
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+
                 <Text style={styles.releaseRights}>
                   © 2025 All rights reserved
                 </Text>
@@ -354,6 +372,8 @@ const styles = StyleSheet.create({
   releaseDevName: {
     color: '#42a5f5',
     fontWeight: 'bold',
+    fontSize: 18,
+    textAlign: 'center',
   },
   releaseRights: {
     color: '#777',

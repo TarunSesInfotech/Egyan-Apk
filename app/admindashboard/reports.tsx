@@ -8,28 +8,37 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import { Dropdown } from 'react-native-element-dropdown';
 
 export default function ReportsOverview() {
-  type FilterKey = 'class' | 'subject' | 'language' | 'level' | 'from' | 'to';
+  type FilterKey = 'class' | 'subject' | 'language' | 'level';
 
   const [filters, setFilters] = useState<Record<FilterKey, string>>({
     class: 'All Classes',
     subject: 'All Subjects',
     language: 'All Languages',
     level: 'All Levels',
-    from: 'dd-mm-yyyy',
-    to: 'dd-mm-yyyy',
   });
 
-  const [open, setOpen] = useState<string | null>(null);
-
   const filterOptions = {
-    class: ['All Classes', '10', '9', '8'],
-    subject: ['All Subjects', 'Math', 'Science', 'English'],
+    class: [
+      'All Classes',
+      'Class 1',
+      'Class 2',
+      'Class 3',
+      'Class 4',
+      'Class 5',
+      'Class 6',
+      'Class 7',
+      'Class 8',
+      'Class 9',
+      'Class 10',
+      'Class 11',
+      'Class 12',
+    ],
+    subject: ['All Subjects', 'Mathematics', 'Science', 'English'],
     language: ['All Languages', 'English', 'Hindi'],
     level: ['All Levels', 'Beginner', 'Intermediate', 'Advanced'],
-    from: ['01-01-2025', '05-01-2025', '10-01-2025'],
-    to: ['15-01-2025', '20-01-2025', '25-01-2025'],
   };
 
   const tableData = [
@@ -88,47 +97,30 @@ export default function ReportsOverview() {
           <Text style={[styles.exportText, { color: '#000' }]}>Print</Text>
         </TouchableOpacity>
       </View>
+
       <View style={styles.filterContainer}>
-        {(Object.keys(filters) as FilterKey[]).map((key) => (
-          <View key={key}>
-            <TouchableOpacity
+        {(Object.keys(filterOptions) as (keyof typeof filterOptions)[]).map(
+          (key) => (
+            <Dropdown
+              key={key}
               style={styles.dropdown}
-              onPress={() => setOpen(open === key ? null : key)}
-            >
-              <Text style={styles.dropdownText}>{filters[key]}</Text>
-
-              <Ionicons
-                name={
-                  key === 'from' || key === 'to'
-                    ? 'calendar-outline'
-                    : 'chevron-down-outline'
-                }
-                size={24}
-                color="#aaa"
-              />
-            </TouchableOpacity>
-
-            {open === key && (
-              <View style={styles.dropdownMenu}>
-                {filterOptions[key as FilterKey].map((option, i) => (
-                  <TouchableOpacity
-                    key={i}
-                    style={styles.dropdownItem}
-                    onPress={() => {
-                      setFilters({ ...filters, [key]: option });
-                      setOpen(null);
-                    }}
-                  >
-                    <Text style={styles.dropdownText}>{option}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-            )}
-          </View>
-        ))}
+              containerStyle={styles.dropdownMenu}
+              placeholderStyle={styles.dropdownText}
+              selectedTextStyle={styles.dropdownText}
+              itemTextStyle={{ color: '#fff' }}
+              data={filterOptions[key].map((v) => ({ label: v, value: v }))}
+              labelField="label"
+              valueField="value"
+              value={filters[key]}
+              placeholder={filters[key]}
+              onChange={(item) => {
+                setFilters({ ...filters, [key]: item.value });
+              }}
+            />
+          )
+        )}
       </View>
 
-      {/* Summary Cards */}
       <View style={styles.cardsContainer}>
         <LinearGradient
           colors={['#7F00FF', '#A24DFE']}
@@ -265,14 +257,11 @@ const styles = StyleSheet.create({
     marginTop: 25,
   },
   dropdown: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     backgroundColor: '#1e1e1e',
     borderRadius: 8,
     paddingHorizontal: 12,
     paddingVertical: 10,
-    minWidth: '47%',
+    width: '49%',
   },
   dropdownText: {
     color: '#fff',
@@ -360,7 +349,6 @@ const styles = StyleSheet.create({
     width: 80,
     textAlign: 'center',
   },
-
   statusBadge: {
     width: 80,
     borderRadius: 6,
@@ -381,8 +369,6 @@ const styles = StyleSheet.create({
   dropdownMenu: {
     backgroundColor: '#1e1e1e',
     borderRadius: 8,
-    marginTop: 4,
-    paddingVertical: 6,
   },
 
   dropdownItem: {

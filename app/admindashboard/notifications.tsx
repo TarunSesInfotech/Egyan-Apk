@@ -1,8 +1,11 @@
-import { notificationsRequests } from '@/app/api/adminapi/adminNotifications';
+import {
+  notificationsConcerns,
+  notificationsRequests,
+} from '@/app/api/adminapi/adminNotifications';
 import { Ionicons } from '@expo/vector-icons';
-import { Picker } from '@react-native-picker/picker';
 import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Dropdown } from 'react-native-element-dropdown';
 
 type RequestItem = {
   id: number;
@@ -11,43 +14,89 @@ type RequestItem = {
   status: string;
 };
 
+type ConcernItem = {
+  id: number;
+  student: string;
+  subject: string;
+  priority: string;
+  status: string;
+  date: string;
+};
+
 export default function NotificationsScreen() {
   const [requests, setRequests] = useState<RequestItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [concerns, setConcerns] = useState<ConcernItem[]>([]);
+
+  const [loadingRequests, setLoadingRequests] = useState(true);
+  const [loadingConcerns, setLoadingConcerns] = useState(true);
 
   useEffect(() => {
-    const fetchNotificationsRequests = async () => {
+    const fetchRequests = async () => {
       try {
-        const response = await notificationsRequests();
-        const formattedRequests: RequestItem[] = response.data.map(
+        const res = await notificationsRequests();
+        const formatted: RequestItem[] = res.data.map(
           (item: any, index: number) => ({
             id: index + 1,
-            user: item.user.username,
-            message: item.message,
-            status: item.status.charAt(0).toUpperCase() + item.status.slice(1),
+            user: item?.user?.username || 'Unknown',
+            message: item?.message || '-',
+            status:
+              item?.status?.charAt(0).toUpperCase() + item?.status?.slice(1),
           })
         );
-        setRequests(formattedRequests);
-      } catch (error) {
-        console.error('Error fetching notifications:', error);
+        setRequests(formatted);
+      } catch (e) {
+        console.error('Error requests:', e);
       } finally {
-        setLoading(false);
+        setLoadingRequests(false);
       }
     };
 
-    fetchNotificationsRequests();
+    const fetchConcerns = async () => {
+      try {
+        const res = await notificationsConcerns();
+        const formatted: ConcernItem[] = res.data.map(
+          (item: any, index: number) => ({
+            id: index + 1,
+            student: item?.student?.username || 'Unknown',
+            subject: item?.subject || '-',
+            priority: item?.priority || '-',
+            status:
+              item?.status?.charAt(0).toUpperCase() + item?.status?.slice(1),
+            date: item?.createdAt
+              ? new Date(item.createdAt).toLocaleDateString()
+              : '-',
+          })
+        );
+        setConcerns(formatted);
+      } catch (e) {
+        console.error('Error concerns:', e);
+      } finally {
+        setLoadingConcerns(false);
+      }
+    };
+
+    fetchRequests();
+    fetchConcerns();
   }, []);
 
-  const updateStatus = (id: number, value: string) => {
+  const updateRequestStatus = (id: number, value: string) => {
     setRequests((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, status: value } : item))
+      prev.map((r) => (r.id === id ? { ...r, status: value } : r))
+    );
+  };
+
+  const updateConcernStatus = (id: number, value: string) => {
+    setConcerns((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, status: value } : c))
     );
   };
 
   return (
     <ScrollView style={styles.container}>
+      {/* ================= STUDENT CONCERNS ================= */}
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Student Concerns</Text>
+
         <View style={styles.tableHeader}>
           <Text style={[styles.th, styles.col20]}>STUDENT</Text>
           <Text style={[styles.th, styles.col20]}>SUBJECT</Text>
@@ -56,10 +105,51 @@ export default function NotificationsScreen() {
           <Text style={[styles.th, styles.col15]}>DATE</Text>
           <Text style={[styles.th, styles.col15]}>ACTION</Text>
         </View>
-        <Text style={styles.emptyText}>No concerns found.</Text>
+
+        {loadingConcerns && (
+          <Text style={styles.emptyText}>Loading concerns...</Text>
+        )}
+
+        {!loadingConcerns && concerns.length === 0 && (
+          <Text style={styles.emptyText}>No concerns found.</Text>
+        )}
+
+        {!loadingConcerns &&
+          concerns.map((item) => (
+            <View key={item.id} style={styles.row}>
+              <Text style={[styles.td, styles.col20]}>{item.student}</Text>
+              <Text style={[styles.td, styles.col20]}>{item.subject}</Text>
+              <Text style={[styles.td, styles.col15]}>{item.priority}</Text>
+
+              <View style={styles.col15}>
+                <Dropdown
+                  style={styles.dropdown}
+                  containerStyle={styles.dropdownContainer}
+                  data={[
+                    { label: 'Pending', value: 'Pending' },
+                    { label: 'Resolved', value: 'Resolved' },
+                  ]}
+                  labelField="label"
+                  valueField="value"
+                  value={item.status}
+                  onChange={(opt) => updateConcernStatus(item.id, opt.value)}
+                />
+              </View>
+
+              <Text style={[styles.td, styles.col15]}>{item.date}</Text>
+
+              <View style={[styles.col15, styles.actionBox]}>
+                <Text style={styles.view}>View</Text>
+                <Ionicons name="trash" size={26} color="#ff6b6b" />
+              </View>
+            </View>
+          ))}
       </View>
+
+      {/* ================= USER REQUESTS ================= */}
       <View style={styles.card}>
         <Text style={styles.cardTitle}>User Requests</Text>
+
         <View style={styles.tableHeader}>
           <Text style={[styles.th, styles.colUser]}>USER NAME</Text>
           <Text style={[styles.th, styles.colMsg]}>MESSAGE</Text>
@@ -68,28 +158,39 @@ export default function NotificationsScreen() {
             ACTION
           </Text>
         </View>
-        {loading && <Text style={styles.emptyText}>Loading requests...</Text>}
-        {!loading && requests.length === 0 && (
+
+        {loadingRequests && (
+          <Text style={styles.emptyText}>Loading requests...</Text>
+        )}
+
+        {!loadingRequests && requests.length === 0 && (
           <Text style={styles.emptyText}>No requests found.</Text>
         )}
-        {!loading &&
+
+        {!loadingRequests &&
           requests.map((item) => (
             <View key={item.id} style={styles.row}>
               <Text style={[styles.td, styles.colUser]}>{item.user}</Text>
+
               <Text style={[styles.td, styles.colMsg]} numberOfLines={2}>
                 {item.message}
               </Text>
+
               <View style={styles.colStatus}>
-                <Picker
-                  selectedValue={item.status}
-                  onValueChange={(value) => updateStatus(item.id, value)}
-                  style={styles.picker}
-                  dropdownIconColor="#fff"
-                >
-                  <Picker.Item label="Pending" value="Pending" />
-                  <Picker.Item label="Resolved" value="Resolved" />
-                </Picker>
+                <Dropdown
+                  style={styles.dropdown}
+                  containerStyle={styles.dropdownContainer}
+                  data={[
+                    { label: 'Pending', value: 'Pending' },
+                    { label: 'Resolved', value: 'Resolved' },
+                  ]}
+                  labelField="label"
+                  valueField="value"
+                  value={item.status}
+                  onChange={(opt) => updateRequestStatus(item.id, opt.value)}
+                />
               </View>
+
               <View style={[styles.colAction, styles.actionBox]}>
                 <Text style={styles.view}>View</Text>
                 <Ionicons name="trash" size={26} color="#ff6b6b" />
@@ -100,6 +201,7 @@ export default function NotificationsScreen() {
     </ScrollView>
   );
 }
+
 /* ================= STYLES ================= */
 const styles = StyleSheet.create({
   container: {
@@ -147,30 +249,24 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     paddingRight: 50,
   },
-  colUser: {
-    width: '18%',
-  },
-  colMsg: {
-    width: '30%',
-  },
-  colStatus: {
-    width: '32%',
-  },
-  colAction: {
-    width: '20%',
-  },
-  col20: {
-    width: '20%',
-  },
-  col15: {
-    width: '15%',
-  },
-  picker: {
-    width: '100%',
+  colUser: { width: '18%' },
+  colMsg: { width: '30%' },
+  colStatus: { width: '32%' },
+  colAction: { width: '20%' },
+  col20: { width: '20%' },
+  col15: { width: '15%' },
+
+  dropdown: {
     height: 40,
     backgroundColor: '#374151',
-    color: '#fff',
+    borderRadius: 6,
+    paddingHorizontal: 10,
   },
+  dropdownContainer: {
+    backgroundColor: '#1f2235',
+    borderRadius: 8,
+  },
+
   actionBox: {
     flexDirection: 'row',
     alignItems: 'center',

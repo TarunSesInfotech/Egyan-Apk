@@ -167,6 +167,26 @@ export default function AdminDrawerLayout() {
           }}
         />
         <Drawer.Screen
+          name="book-manage"
+          options={{
+            drawerLabel: 'Book Manage',
+            title: 'Book Manage',
+            drawerIcon: ({ color }) => (
+              <Ionicons name="book" size={30} color={color} />
+            ),
+          }}
+        />
+        <Drawer.Screen
+          name="upload-content"
+          options={{
+            drawerLabel: 'Upload Content',
+            title: 'Upload Content',
+            drawerIcon: ({ color }) => (
+              <Ionicons name="cloud-upload-outline" size={30} color={color} />
+            ),
+          }}
+        />
+        <Drawer.Screen
           name="notifications"
           options={{
             drawerLabel: 'Notifications',
@@ -176,7 +196,7 @@ export default function AdminDrawerLayout() {
               fontSize: 24,
             },
             drawerItemStyle: {
-              marginTop: 490,
+              marginTop: 380,
               backgroundColor: '#3572ef',
               borderRadius: 12,
               height: 70,

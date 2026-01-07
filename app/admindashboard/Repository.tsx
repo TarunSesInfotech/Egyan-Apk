@@ -1,4 +1,3 @@
-import WelcomeHeader from '@/components/WelcomeHeader';
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -283,7 +282,6 @@ export default function Repository() {
     <AlertNotificationRoot>
       <View style={styles.container}>
         <ScrollView style={styles.mainContent}>
-          <WelcomeHeader />
           <Text style={styles.sectionTitle}>Create Repository</Text>
 
           {renderSection('category', repositoryData.category || [])}

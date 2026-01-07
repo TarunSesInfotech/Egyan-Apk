@@ -161,7 +161,6 @@ export default function ManageStudents() {
   return (
     <View style={styles.container}>
       <ScrollView style={styles.mainContent}>
-        <Text style={styles.welcomeText}>Hi, Welcome Mr. Admin</Text>
         <View style={styles.headerRow}>
           <Text style={styles.sectionTitle}>Students Progress</Text>
 
@@ -329,7 +328,7 @@ const styles = StyleSheet.create({
   dropdownRow: {
     position: 'relative',
     width: 170,
-  }, 
+  },
   dropdown: {
     backgroundColor: '#1e1e1e',
     paddingHorizontal: 15,
@@ -362,7 +361,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginTop: 20,
     marginBottom: 15,
   },
   rightControls: {

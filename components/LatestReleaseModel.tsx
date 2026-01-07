@@ -32,10 +32,10 @@ export default function LatestReleaseModel({ visible, onClose }: any) {
       <View style={styles.modalBackdrop}>
         <View style={styles.modalContainer}>
           <View style={styles.banner}>
-            <Text style={styles.bannerIcon}>🚀</Text>
-            <Text style={styles.bannerTitle}>What's New?</Text>
+            <Text style={styles.bannerTitle}>🚀 What's New?</Text>
             <Text style={styles.bannerSubtitle}>
-              Latest updates, improvements, and bug fixes.
+              A changelog of the latest Quickli feature releases, product
+              updates, and important bug fixes.
             </Text>
           </View>
 
@@ -110,6 +110,8 @@ const styles = StyleSheet.create({
     color: '#e0e0e0',
     textAlign: 'center',
     marginTop: 4,
+    fontSize: 20,
+    fontWeight: 600,
   },
   timelineRow: {
     flexDirection: 'row',
@@ -123,6 +125,7 @@ const styles = StyleSheet.create({
     borderRadius: 7,
   },
   dateText: {
+    fontSize: 18,
     color: '#fff',
     marginLeft: 10,
   },
@@ -141,17 +144,20 @@ const styles = StyleSheet.create({
   },
   sectionHeading: {
     color: '#8ab4ff',
-    fontSize: 18,
+    fontSize: 20,
     marginTop: 10,
+    fontWeight: '600',
   },
   sectionHeadingBug: {
     color: '#ff6ab4',
-    fontSize: 18,
+    fontSize: 20,
     marginTop: 10,
+    fontWeight: '600',
   },
   bullet: {
     color: '#ddd',
     marginTop: 6,
+    fontSize: 17,
   },
   closeBtn: {
     backgroundColor: '#1d8cf8',
@@ -163,5 +169,6 @@ const styles = StyleSheet.create({
   closeBtnText: {
     color: '#fff',
     fontWeight: 'bold',
+    fontSize: 20,
   },
 });

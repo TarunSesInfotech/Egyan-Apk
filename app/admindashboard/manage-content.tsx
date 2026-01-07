@@ -1,7 +1,6 @@
 import EditBookModal from '@/components/EditBookModal';
 import ManageBookChaptersModal from '@/components/ManageBookChaptersModal';
 import UploadBookModal from '@/components/UploadBookModal';
-import WelcomeHeader from '@/components/WelcomeHeader';
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import {
@@ -235,7 +234,6 @@ export default function ManageContent() {
 
   return (
     <View style={styles.container}>
-      <WelcomeHeader />
       <View style={styles.headerRow}>
         <View style={styles.searchContainer}>
           <Ionicons name="search" size={24} color="#aaa" />
@@ -255,7 +253,14 @@ export default function ManageContent() {
       </View>
 
       <View style={styles.classHeader}>
-        <Text style={styles.sectionTitle}>Manage Books</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+          <Ionicons
+            name="book"
+            size={26}
+            style={{ marginRight: 6, color: 'white' }}
+          />
+          <Text style={styles.sectionTitle}>Manage Books</Text>
+        </View>
         <View style={styles.dropdownContainer}>
           <Dropdown
             style={styles.dropdown}
@@ -380,8 +385,8 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: '#aaa',
-    fontSize: 20,
-    marginBottom: 10,
+    fontSize: 24,
+    marginBottom: 5,
   },
   headerRow: {
     flexDirection: 'row',

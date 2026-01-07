@@ -167,7 +167,6 @@ export default function RoleManagement() {
     <AlertNotificationRoot>
       <View style={styles.container}>
         <ScrollView style={styles.mainContent}>
-          <Text style={styles.welcomeText}>Hi, Welcome Mr. Admin</Text>
           <Text style={styles.sectionTitle}>Manage Role</Text>
 
           <View style={styles.searchFilterRow}>
@@ -366,8 +365,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: '#aaa',
-    fontSize: 24,
-    marginTop: 20,
+    fontSize: 26,
     marginBottom: 15,
   },
   searchFilterRow: {
@@ -406,7 +404,7 @@ const styles = StyleSheet.create({
   tableHeaderText: {
     color: '#000',
     fontWeight: '600',
-    fontSize: 18,
+    fontSize: 20,
   },
   tableRow: {
     flexDirection: 'row',
@@ -418,7 +416,7 @@ const styles = StyleSheet.create({
   },
   tableCell: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 18,
   },
   statusContainer: {
     justifyContent: 'center',
@@ -462,7 +460,7 @@ const styles = StyleSheet.create({
   },
   paginationInfo: {
     color: '#fff',
-    fontSize: 16,
+    fontSize: 20,
   },
   paginationContainer: {
     flexDirection: 'row',
@@ -481,7 +479,7 @@ const styles = StyleSheet.create({
   },
   pageButtonText: {
     color: '#fff',
-    fontSize: 15,
+    fontSize: 20,
   },
   pageNumber: {
     backgroundColor: '#2b2b36',
@@ -495,7 +493,7 @@ const styles = StyleSheet.create({
   },
   pageNumberText: {
     color: '#fff',
-    fontSize: 15,
+    fontSize: 20,
   },
   colName: { flex: 2, minWidth: 100 },
   colEmail: { flex: 3, minWidth: 160 },
