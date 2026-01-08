@@ -12,6 +12,11 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import {
+  ALERT_TYPE,
+  AlertNotificationRoot,
+  Dialog,
+} from 'react-native-alert-notification';
 import * as XLSX from 'xlsx';
 import { userStudentProgress } from '../api/adminapi/adminDashboard';
 
@@ -62,7 +67,11 @@ export default function ManageStudents() {
 
       setStudents(formatted);
     } catch (err) {
-      console.log('err :>> ', err);
+      Dialog.show({
+        type: ALERT_TYPE.DANGER,
+        title: 'Error fetching Manage-student',
+        button: 'Try Again',
+      });
     }
   };
 
@@ -154,132 +163,138 @@ export default function ManageStudents() {
 
       await Sharing.shareAsync(fileUri);
     } catch (error) {
-      console.log('Excel export error:', error);
+      Dialog.show({
+        type: ALERT_TYPE.DANGER,
+        title: 'Excel export error',
+        button: 'Try Again',
+      });
     }
   };
 
   return (
-    <View style={styles.container}>
-      <ScrollView style={styles.mainContent}>
-        <View style={styles.headerRow}>
-          <Text style={styles.sectionTitle}>Students Progress</Text>
+    <AlertNotificationRoot>
+      <View style={styles.container}>
+        <ScrollView style={styles.mainContent}>
+          <View style={styles.headerRow}>
+            <Text style={styles.sectionTitle}>Students Progress</Text>
 
-          <View style={styles.rightControls}>
-            <TouchableOpacity
-              style={styles.exportButton}
-              onPress={exportToExcel}
-            >
-              <Ionicons name="download-outline" size={24} color="#fff" />
-              <Text style={styles.exportText}>Export CSV</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-
-        <View style={styles.controlsRow}>
-          <View style={styles.searchContainer}>
-            <Ionicons name="search" size={28} color="#bbb" />
-            <TextInput
-              placeholder="Search name, id, or keywords..."
-              placeholderTextColor="#999"
-              style={styles.searchInput}
-              value={searchQuery}
-              onChangeText={setSearchQuery}
-            />
-          </View>
-          <View style={styles.dropdownRow}>
-            <TouchableOpacity
-              style={styles.dropdown}
-              onPress={() => setSortVisible(!sortVisible)}
-            >
-              <Text style={styles.dropdownText}>{sortType} ▼</Text>
-            </TouchableOpacity>
-
-            {sortVisible && (
-              <View style={styles.dropdownMenu}>
-                <TouchableOpacity
-                  style={styles.dropdownItem}
-                  onPress={() => applySort('Name A → Z')}
-                >
-                  <Text style={styles.dropdownItemText}>Name A → Z</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.dropdownItem}
-                  onPress={() => applySort('Name Z → A')}
-                >
-                  <Text style={styles.dropdownItemText}>Name Z → A</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.dropdownItem}
-                  onPress={() => applySort('Avg High → Low')}
-                >
-                  <Text style={styles.dropdownItemText}>Avg High → Low</Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                  style={styles.dropdownItem}
-                  onPress={() => applySort('Avg Low → High')}
-                >
-                  <Text style={styles.dropdownItemText}>Avg Low → High</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
-        </View>
-
-        {paginatedStudents.map((student) => (
-          <StudentCard
-            key={student.id}
-            student={student}
-            openModal={openModal}
-          />
-        ))}
-
-        <View style={styles.paginationContainer}>
-          <Text style={styles.paginationText}>
-            Showing {paginatedStudents.length} students — page {currentPage} of{' '}
-            {totalPages}
-          </Text>
-
-          <View style={styles.paginationButtons}>
-            <TouchableOpacity
-              style={[
-                styles.pageButton,
-                currentPage === 1 && styles.disabledButton,
-              ]}
-              disabled={currentPage === 1}
-              onPress={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-            >
-              <Text style={styles.pageButtonText}>Prev</Text>
-            </TouchableOpacity>
-
-            <View style={styles.pageIndicator}>
-              <Text style={styles.pageNumber}>{currentPage}</Text>
+            <View style={styles.rightControls}>
+              <TouchableOpacity
+                style={styles.exportButton}
+                onPress={exportToExcel}
+              >
+                <Ionicons name="download-outline" size={24} color="#fff" />
+                <Text style={styles.exportText}>Export CSV</Text>
+              </TouchableOpacity>
             </View>
-
-            <TouchableOpacity
-              style={[
-                styles.pageButton,
-                currentPage === totalPages && styles.disabledButton,
-              ]}
-              disabled={currentPage === totalPages}
-              onPress={() =>
-                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-              }
-            >
-              <Text style={styles.pageButtonText}>Next</Text>
-            </TouchableOpacity>
           </View>
-        </View>
-      </ScrollView>
 
-      <StudentModal
-        visible={modalVisible}
-        onClose={closeModal}
-        student={selectedStudent}
-      />
-    </View>
+          <View style={styles.controlsRow}>
+            <View style={styles.searchContainer}>
+              <Ionicons name="search" size={28} color="#bbb" />
+              <TextInput
+                placeholder="Search name, id, or keywords..."
+                placeholderTextColor="#999"
+                style={styles.searchInput}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+              />
+            </View>
+            <View style={styles.dropdownRow}>
+              <TouchableOpacity
+                style={styles.dropdown}
+                onPress={() => setSortVisible(!sortVisible)}
+              >
+                <Text style={styles.dropdownText}>{sortType} ▼</Text>
+              </TouchableOpacity>
+
+              {sortVisible && (
+                <View style={styles.dropdownMenu}>
+                  <TouchableOpacity
+                    style={styles.dropdownItem}
+                    onPress={() => applySort('Name A → Z')}
+                  >
+                    <Text style={styles.dropdownItemText}>Name A → Z</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.dropdownItem}
+                    onPress={() => applySort('Name Z → A')}
+                  >
+                    <Text style={styles.dropdownItemText}>Name Z → A</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.dropdownItem}
+                    onPress={() => applySort('Avg High → Low')}
+                  >
+                    <Text style={styles.dropdownItemText}>Avg High → Low</Text>
+                  </TouchableOpacity>
+
+                  <TouchableOpacity
+                    style={styles.dropdownItem}
+                    onPress={() => applySort('Avg Low → High')}
+                  >
+                    <Text style={styles.dropdownItemText}>Avg Low → High</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          </View>
+
+          {paginatedStudents.map((student) => (
+            <StudentCard
+              key={student.id}
+              student={student}
+              openModal={openModal}
+            />
+          ))}
+
+          <View style={styles.paginationContainer}>
+            <Text style={styles.paginationText}>
+              Showing {paginatedStudents.length} students — page {currentPage}{' '}
+              of {totalPages}
+            </Text>
+
+            <View style={styles.paginationButtons}>
+              <TouchableOpacity
+                style={[
+                  styles.pageButton,
+                  currentPage === 1 && styles.disabledButton,
+                ]}
+                disabled={currentPage === 1}
+                onPress={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              >
+                <Text style={styles.pageButtonText}>Prev</Text>
+              </TouchableOpacity>
+
+              <View style={styles.pageIndicator}>
+                <Text style={styles.pageNumber}>{currentPage}</Text>
+              </View>
+
+              <TouchableOpacity
+                style={[
+                  styles.pageButton,
+                  currentPage === totalPages && styles.disabledButton,
+                ]}
+                disabled={currentPage === totalPages}
+                onPress={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
+              >
+                <Text style={styles.pageButtonText}>Next</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
+
+        <StudentModal
+          visible={modalVisible}
+          onClose={closeModal}
+          student={selectedStudent}
+        />
+      </View>
+    </AlertNotificationRoot>
   );
 }
 

@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import DateTimePicker from '@react-native-community/datetimepicker';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useState } from 'react';
 import {
@@ -19,6 +20,11 @@ export default function ReportsOverview() {
     language: 'All Languages',
     level: 'All Levels',
   });
+  const [fromDate, setFromDate] = useState<Date | null>(null);
+  const [toDate, setToDate] = useState<Date | null>(null);
+
+  const [showFromPicker, setShowFromPicker] = useState(false);
+  const [showToPicker, setShowToPicker] = useState(false);
 
   const filterOptions = {
     class: [
@@ -70,6 +76,7 @@ export default function ReportsOverview() {
 
   return (
     <ScrollView style={styles.container}>
+      <Text style={styles.title}>📊 E-Gyan School Reports</Text>
       <Text style={styles.subtitle}>
         Analyze student reading activity, book completion, and engagement
         metrics.
@@ -118,6 +125,52 @@ export default function ReportsOverview() {
               }}
             />
           )
+        )}
+
+        <TouchableOpacity
+          style={styles.datePicker}
+          onPress={() => setShowFromPicker(true)}
+        >
+          <Ionicons name="calendar-outline" size={24} color="#fff" />
+          <Text style={styles.dateText}>
+            {fromDate ? fromDate.toDateString() : 'From Date'}
+          </Text>
+        </TouchableOpacity>
+
+        {/* TO DATE */}
+        <TouchableOpacity
+          style={styles.datePicker}
+          onPress={() => setShowToPicker(true)}
+        >
+          <Ionicons name="calendar-outline" size={24} color="#fff" />
+          <Text style={styles.dateText}>
+            {toDate ? toDate.toDateString() : 'To Date'}
+          </Text>
+        </TouchableOpacity>
+
+        {/* DATE PICKERS */}
+        {showFromPicker && (
+          <DateTimePicker
+            value={fromDate || new Date()}
+            mode="date"
+            display="default"
+            onChange={(event, date) => {
+              setShowFromPicker(false);
+              if (date) setFromDate(date);
+            }}
+          />
+        )}
+
+        {showToPicker && (
+          <DateTimePicker
+            value={toDate || new Date()}
+            mode="date"
+            display="default"
+            onChange={(event, date) => {
+              setShowToPicker(false);
+              if (date) setToDate(date);
+            }}
+          />
         )}
       </View>
 
@@ -226,9 +279,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#121212',
     padding: 20,
   },
+  title: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: 'bold',
+  },
   subtitle: {
     color: '#fff',
-    fontSize: 22,
+    fontSize: 20,
     marginTop: 8,
     marginBottom: 20,
   },
@@ -299,7 +357,7 @@ const styles = StyleSheet.create({
   },
   tableTitle: {
     color: '#fff',
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: 'bold',
     marginBottom: 12,
   },
@@ -376,5 +434,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderBottomWidth: 0.5,
     borderBottomColor: '#333',
+  },
+  datePicker: {
+    backgroundColor: '#1e1e1e',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 14,
+    width: '49%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+
+  dateText: {
+    color: '#fff',
+    fontSize: 18,
   },
 });

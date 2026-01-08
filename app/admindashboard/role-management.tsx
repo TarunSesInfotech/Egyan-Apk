@@ -41,10 +41,20 @@ export default function RoleManagement() {
       } else if (Array.isArray(response)) {
         setUserRoleData(response);
       } else {
-        console.error('Unexpected API format:', response);
+        Dialog.show({
+          type: ALERT_TYPE.DANGER,
+          title: 'Error',
+          textBody: response.message || 'Delete failed.',
+          button: 'Close',
+        });
       }
     } catch (error: any) {
-      console.error('Error fetching UserRole data:', error.message);
+      Dialog.show({
+        type: ALERT_TYPE.DANGER,
+        title: 'Error fetching UserRole data:',
+        textBody: error.message || 'Delete failed.',
+        button: 'Close',
+      });
     }
   };
 
