@@ -1,6 +1,6 @@
 import WelcomeHeader from '@/components/WelcomeHeader';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { studentProgressApi } from '../api/studentapi/progressActiivityApi';
 
@@ -138,7 +138,6 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   sectionTitle: {
-    textAlign: 'center',
     color: '#43FF9B',
     fontSize: 28,
     marginTop: 20,
@@ -148,7 +147,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     marginTop: 5,
     marginBottom: 20,
-    textAlign: 'center',
   },
   statsContainer: {
     flexDirection: 'row',

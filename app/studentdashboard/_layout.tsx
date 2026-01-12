@@ -13,6 +13,7 @@ import { View } from 'react-native';
 function CustomDrawerContent(props: DrawerContentComponentProps) {
   const router = useRouter();
 
+  {/* ===== Logout Function here ===== */}
   const handleLogout = async () => {
     try {
       await AsyncStorage.removeItem('token');
@@ -21,6 +22,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
       console.error('Logout error:', error);
     }
   };
+  
   return (
     <DrawerContentScrollView
       {...props}

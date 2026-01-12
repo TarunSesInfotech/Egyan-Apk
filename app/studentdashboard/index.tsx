@@ -1,21 +1,23 @@
-import WelcomeHeader from '@/components/WelcomeHeader';
-import { FontAwesome5, Ionicons, MaterialIcons } from '@expo/vector-icons';
-import React, { useEffect, useState } from 'react';
+import AnnouncementsSection from "@/components/studentcomponents/AnnouncementsSection";
+import AssessmentsList from "@/components/studentcomponents/AssessmentsList";
+import QuickActions from "@/components/studentcomponents/QuickActions";
+import QuizzesList from "@/components/studentcomponents/QuizzesList";
+import WelcomeHeader from "@/components/WelcomeHeader";
+import { FontAwesome5, Ionicons } from "@expo/vector-icons";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   ScrollView,
   StyleSheet,
   Text,
-  View,
-} from 'react-native';
+  View
+} from "react-native";
 import {
-  announcementsApi,
-  studentMetrices,
-} from '../api/studentapi/studentDashboardApi';
+  studentMetrices
+} from "../api/studentapi/studentDashboardApi";
 
 export default function StudentDashboard() {
-  const [metrics, setMetrics] = useState<any>('');
-  const [announcements, setAnnouncements] = useState<any[]>([]);
+  const [metrics, setMetrics] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   const fetchMetrics = async () => {
@@ -23,26 +25,9 @@ export default function StudentDashboard() {
       const response = await studentMetrices();
       if (response.success) {
         setMetrics(response.data);
-      } else {
-        console.error('Error fetching metrics:', response.message);
       }
     } catch (error: any) {
-      console.error('Error fetching metrics:', error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchAnnouncements = async () => {
-    try {
-      const response = await announcementsApi();
-      if (response.success) {
-        setAnnouncements(response.data);
-      } else {
-        console.error('Error fetching announcements:', response.message);
-      }
-    } catch (error: any) {
-      console.error('Error fetching announcements:', error.message);
+      console.error(error.message);
     } finally {
       setLoading(false);
     }
@@ -50,155 +35,146 @@ export default function StudentDashboard() {
 
   useEffect(() => {
     fetchMetrics();
-    fetchAnnouncements();
   }, []);
 
   const formatTime = (totalSeconds: number) => {
     const safe = Math.max(0, Math.floor(Number(totalSeconds) || 0));
     const hours = Math.floor(safe / 3600);
     const minutes = Math.floor((safe % 3600) / 60);
-    return `${hours}h ${String(minutes).padStart(2, '0')}m`;
+    return `${hours}h ${String(minutes).padStart(2, "0")}m`;
   };
 
   const stats = metrics
     ? [
         {
-          title: 'Total Time Spent',
+          title: "Total Time Spent",
           value: formatTime(metrics.totalTimeSpent),
-          color: '#FF6B00',
-          icon: <Ionicons name="time" size={40} color="#FF6B00" />,
+          color: "#FF6B00",
+          icon: <Ionicons name="time" size={32} color="#FF6B00" />,
         },
         {
-          title: 'Books Completed',
+          title: "Books Completed",
           value: metrics.booksCompleted,
-          color: '#43B0FF',
-          icon: <FontAwesome5 name="book" size={40} color="#43B0FF" />,
+          color: "#43B0FF",
+          icon: <FontAwesome5 name="book" size={30} color="#43B0FF" />,
         },
         {
-          title: 'Recent Activity',
+          title: "Recent Activity",
           value: metrics.recentActivityCount,
-          color: '#43FF9B',
-          icon: <Ionicons name="book-outline" size={40} color="#43FF9B" />,
+          color: "#43FF9B",
+          icon: <Ionicons name="book-outline" size={32} color="#43FF9B" />,
         },
         {
-          title: 'Favorites',
+          title: "Favorites",
           value: metrics.favoriteBooksCount,
-          color: '#FFB800',
-          icon: <Ionicons name="heart" size={28} color="#FFB800" />,
+          color: "#FFB800",
+          icon: <Ionicons name="heart" size={32} color="#FFB800" />,
         },
       ]
     : [];
 
   return (
     <View style={styles.container}>
-      <ScrollView style={styles.mainContent}>
+      <ScrollView
+        style={styles.mainContent}
+        showsVerticalScrollIndicator={false}
+      >
         <WelcomeHeader />
         <Text style={styles.sectionTitle}>Dashboard Overview</Text>
+
         {loading ? (
-          <ActivityIndicator
-            size="large"
-            color="#43FF9B"
-            style={{ marginVertical: 20 }}
-          />
+          <ActivityIndicator size="large" color="#43FF9B" />
         ) : (
           <View style={styles.statsContainer}>
             {stats.map((item, index) => (
-              <View key={index} style={styles.statCard}>
-                <View style={styles.iconContainer}>{item.icon}</View>
-                <Text style={[styles.statValue, { color: item.color }]}>
-                  {item.value}
-                </Text>
-                <Text style={styles.statTitle}>{item.title}</Text>
+              <View key={index} style={styles.dashboardCard}>
+                <View
+                  style={[
+                    styles.dashboardIconWrapper,
+                    { backgroundColor: `${item.color}20` },
+                  ]}
+                >
+                  {item.icon}
+                </View>
+
+                <View style={styles.dashboardTextWrapper}>
+                  <Text style={styles.dashboardTitle}>{item.title}</Text>
+                  <Text style={styles.dashboardValue}>{item.value}</Text>
+                </View>
               </View>
             ))}
           </View>
         )}
-        <Text style={styles.announcementTitle}>📌 Announcements</Text>
-        {announcements.length > 0 ? (
-          announcements.map((a) => (
-            <View key={a.id} style={styles.announcementCard}>
-              <MaterialIcons
-                name="campaign"
-                size={40}
-                color="#FFD700"
-                style={{ marginRight: 8 }}
-              />
-              <View style={{ flex: 1 }}>
-                <Text style={styles.announcementText}>{a.message}</Text>
-              </View>
-            </View>
-          ))
-        ) : (
-          <Text style={{ color: '#aaa', fontSize: 18 }}>
-            No announcements available.
-          </Text>
-        )}
+
+        {/* QuickActions */}
+        <QuickActions />
+
+        {/* ===== ANNOUNCEMENTS ===== */}
+        <AnnouncementsSection />
+
+        {/* ===== ASSESSMENTS ===== */}
+        <AssessmentsList />
+
+         {/* ===== QUIZZES ===== */}
+        <QuizzesList />
+
       </ScrollView>
     </View>
   );
 }
 
+/* ===================== STYLES ===================== */
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: "#121212",
+    padding: 15,
   },
   mainContent: {
-    flex: 1,
-    padding: 20,
+    padding: 15,
   },
   sectionTitle: {
-    textAlign: 'center',
-    color: '#43FF9B',
-    fontSize: 28,
-    marginTop: 20,
-    marginBottom: 20,
+    color: "#43FF9B",
+    fontSize: 24,
+    fontWeight: "bold",
+    marginVertical: 5,
   },
+
+  /* ===== DASHBOARD STATS ===== */
   statsContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
   },
-  statCard: {
-    backgroundColor: '#1E1E2E',
-    borderRadius: 12,
-    width: '48%',
-    padding: 15,
-    marginBottom: 15,
-    alignItems: 'center',
+  dashboardCard: {
+    width: "48%",
+    backgroundColor: "#1C1F2E",
+    borderRadius: 20,
+    padding: 18,
+    marginBottom: 16,
+    flexDirection: "row",
+    alignItems: "center",
   },
-  iconContainer: {
-    marginBottom: 10,
+  dashboardIconWrapper: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: 14,
   },
-  statValue: {
-    fontSize: 28,
-    fontWeight: 'bold',
-  },
-  statTitle: {
-    color: '#ddd',
-    fontSize: 18,
-    marginTop: 5,
-    textAlign: 'center',
-  },
-  announcementTitle: {
-    fontSize: 35,
-    fontWeight: 'bold',
-    color: '#FF5C8A',
-    marginTop: 20,
-    marginBottom: 20,
-  },
-  announcementCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#1E1E2E',
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 26,
-  },
-  announcementText: {
-    color: '#ccc',
-    fontSize: 20,
+  dashboardTextWrapper: {
     flex: 1,
-    marginTop: 7,
+  },
+  dashboardTitle: {
+    color: "#CFCFCF",
+    fontSize: 18,
+    marginBottom: 6,
+  },
+  dashboardValue: {
+    color: "#FFFFFF",
+    fontSize: 24,
+    fontWeight: "bold",
   },
 });

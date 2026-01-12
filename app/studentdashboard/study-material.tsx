@@ -2,7 +2,7 @@ import { CurrentAffairs } from '@/components/CurrentAffairs';
 import { SchoolEducation } from '@/components/SchoolEducation';
 import { Simulation } from '@/components/Simulation';
 import { FontAwesome5 } from '@expo/vector-icons';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -10,8 +10,10 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
-import { repositoryOverview } from '../api/adminapi/adminDashboard';
-import { studentStudyMaterialApi } from '../api/studentapi/studyMaterialApi';
+import {
+  studentStudyMaterialApi,
+  studentStudyMaterialcategoryApi,
+} from '../api/studentapi/studyMaterialApi';
 
 export default function StudyMaterial() {
   const [categories, setCategories] = useState<any[]>([]);
@@ -43,28 +45,15 @@ export default function StudyMaterial() {
 
   const fetchRepositoryApi = async () => {
     try {
-      const response = await repositoryOverview();
+      const response = await studentStudyMaterialcategoryApi();
       if (response.success) {
-        const repoData = response.data;
-        const repoCategories: string[] = [
-          ...new Set(
-            repoData.flatMap((item: any) =>
-              typeof item.Categories === 'string'
-                ? item.Categories.split(',').map((cat: string) => cat.trim())
-                : []
-            ) as string[]
+        const formattedCategories = response.data.map((item: any) => ({
+          id: item.id,
+          title: item.text,
+          icon: iconMapping[item.text] || (
+            <FontAwesome5 name="book" size={40} color="#aaa" />
           ),
-        ];
-
-        const formattedCategories = repoCategories.map(
-          (cat: string, index: number) => ({
-            id: index + 1,
-            title: cat,
-            icon: iconMapping[cat] || (
-              <FontAwesome5 name="book" size={40} color="#aaa" />
-            ),
-          })
-        );
+        }));
 
         setCategories(formattedCategories);
       }
@@ -91,7 +80,6 @@ export default function StudyMaterial() {
         <CurrentAffairs onBack={() => setSelectedCategory(null)} />
       ) : (
         <ScrollView style={styles.mainContent}>
-          <Text style={styles.welcomeText}>Hi, Welcome Mr. Student</Text>
           <Text style={styles.sectionTitle}>📚 Study Material Category</Text>
 
           <View style={styles.categoriesContainer}>
