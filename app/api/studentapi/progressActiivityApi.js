@@ -18,6 +18,7 @@ export const studentProgressApi = async () => {
     return { success: false, message: error.message };
   }
 };
+
 // student simulations Api
 export const studentSimulationsApi = async () => {
   try {

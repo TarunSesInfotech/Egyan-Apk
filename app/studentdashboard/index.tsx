@@ -79,6 +79,7 @@ export default function StudentDashboard() {
         style={styles.mainContent}
         showsVerticalScrollIndicator={false}
       >
+         {/* Welcome Header */}
         <WelcomeHeader />
         <Text style={styles.sectionTitle}>Dashboard Overview</Text>
 
