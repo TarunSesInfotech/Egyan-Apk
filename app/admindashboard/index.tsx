@@ -210,7 +210,7 @@ export default function AdminDashboard() {
                 </Text>
                 <Text style={styles.releaseUpdated}>
                   Last Updated:{' '}
-                  <Text style={{ color: '#66bb6a' }}>12 November 2025</Text>
+                  <Text style={{ color: '#66bb6a' }}>09 November 2026</Text>
                 </Text>
               </View>
               <View style={{ alignItems: 'flex-end' }}>
@@ -236,7 +236,7 @@ export default function AdminDashboard() {
                 </View>
 
                 <Text style={styles.releaseRights}>
-                  © 2025 All rights reserved
+                  © 2026 All rights reserved
                 </Text>
               </View>
             </View>
