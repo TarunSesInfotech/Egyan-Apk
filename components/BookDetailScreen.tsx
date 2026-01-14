@@ -1,6 +1,7 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { StudentBookApi } from '@/app/api/studentapi/studyMaterialApi';
 import { Ionicons } from '@expo/vector-icons';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   FlatList,
   Image,
@@ -11,7 +12,7 @@ import {
 } from 'react-native';
 import { WebView } from 'react-native-webview';
 
-const BookDetailScreen = ({ data, onBack }: any) => {
+const BookDetailScreen = ({data, onBack }: any) => {
   const [chapters, setChapters] = useState<any[]>([]);
   const [selectedFile, setSelectedFile] = useState<string>('');
   const [activeTab, setActiveTab] = useState<string>('');

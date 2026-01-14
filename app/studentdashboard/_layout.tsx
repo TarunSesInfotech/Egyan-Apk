@@ -31,7 +31,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
       <View style={{ flex: 1, marginTop: 10 }}>
         <DrawerItemList {...props} />
       </View>
-      <DrawerItem
+      {/* <DrawerItem
         label="Notifications"
         labelStyle={{ color: '#fff', fontSize: 24 }}
         icon={() => <Ionicons name="notifications" size={30} color={'#fff'} />}
@@ -56,7 +56,7 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
           height: 70,
           justifyContent: 'center',
         }}
-      />
+      /> */}
       <DrawerItem
         label="Logout"
         labelStyle={{ color: '#fff', fontSize: 24 }}

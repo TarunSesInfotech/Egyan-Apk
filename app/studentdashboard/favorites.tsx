@@ -1,6 +1,5 @@
-import WelcomeHeader from '@/components/WelcomeHeader';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -40,8 +39,7 @@ export default function Favorites() {
   return (
     <View style={styles.container}>
       <ScrollView style={styles.mainContent}>
-        <WelcomeHeader />
-        <View style={styles.sectionHeader}>
+        <View style={{ flexDirection: 'row' }}>
           <Ionicons name="heart" size={40} color="pink" />
           <Text style={styles.sectionTitle}>Favorite Books</Text>
         </View>
@@ -78,7 +76,7 @@ export default function Favorites() {
     </View>
   );
 }
-
+  
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -88,34 +86,27 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 20,
   },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: 20,
-  },
   sectionTitle: {
     color: '#43B0FF',
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: 'bold',
     marginLeft: 10,
   },
   subTitle: {
     color: '#aaa',
-    fontSize: 24,
-    marginBottom: 20,
-    textAlign: 'center',
+    fontSize: 22,
     marginTop: 5,
   },
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
+    marginTop: 20,
   },
   card: {
     backgroundColor: '#1E1E2E',
     borderRadius: 12,
-    width: '48%',
+    width: '49%',
     padding: 15,
     marginBottom: 15,
   },
