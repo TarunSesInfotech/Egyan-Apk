@@ -20,7 +20,7 @@ export default function LatestReleaseModel({ visible, onClose }: any) {
       gradient: ['#2b2d42', '#1e3c72'],
     },
     {
-      date: 'Nov 6, 2025',
+      date: 'Jan 09, 2026',
       version: 'Version 0.0.1',
       improvements: ['Fix bugs on manage book'],
       bugfixes: ['Reduced data loading and updating time'],
@@ -32,7 +32,7 @@ export default function LatestReleaseModel({ visible, onClose }: any) {
       <View style={styles.modalBackdrop}>
         <View style={styles.modalContainer}>
           <View style={styles.banner}>
-            <Text style={styles.bannerTitle}>🚀 What's New?</Text>
+            <Text style={styles.bannerTitle}>🚀 What&apos;s New?</Text>
             <Text style={styles.bannerSubtitle}>
               A changelog of the latest Quickli feature releases, product
               updates, and important bug fixes.

@@ -134,11 +134,21 @@ export default function StudentDrawerLayout() {
             ),
           }}
         />
-        <Drawer.Screen
+        {/* <Drawer.Screen
           name="my-courses"
           options={{
             drawerLabel: "My Courses",
             title: "My Courses",
+            drawerIcon: ({ color }) => (
+              <Ionicons name="book" size={30} color={color} />
+            ),
+          }}
+        /> */}
+        <Drawer.Screen
+          name="my-books"
+          options={{
+            drawerLabel: "My Books",
+            title: "My Books",
             drawerIcon: ({ color }) => (
               <Ionicons name="book" size={30} color={color} />
             ),
