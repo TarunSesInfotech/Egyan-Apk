@@ -1,17 +1,19 @@
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
-import { useEffect, useState } from 'react';
+import BookDetailScreen from "@/components/BookDetailScreen";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { useEffect, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-} from 'react-native';
-import { studentfavoriteApi } from '../api/studentapi/favoriteApi';
+} from "react-native";
+import { studentfavoriteApi } from "../api/studentapi/favoriteApi";
 
 export default function Favorites() {
   const [favoriteBooks, setFavoriteBooks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedBook, setSelectedBook] = useState<any>(null);
   const fetchfavorite = async () => {
     try {
       const response = await studentfavoriteApi();
@@ -24,10 +26,10 @@ export default function Favorites() {
         }));
         setFavoriteBooks(formattedBooks);
       } else {
-        console.error('Error fetching favorites:', response.message);
+        console.error("Error fetching favorites:", response.message);
       }
     } catch (error: any) {
-      console.error('Error fetching favorites:', error.message);
+      console.error("Error fetching favorites:", error.message);
     } finally {
       setLoading(false);
     }
@@ -36,10 +38,17 @@ export default function Favorites() {
     fetchfavorite();
   }, []);
 
+  if (selectedBook) {
+    const bookData = favoriteBooks.find((b) => b.id === selectedBook);
+    return (
+      <BookDetailScreen data={bookData} onBack={() => setSelectedBook(false)} />
+    );
+  }
+
   return (
     <View style={styles.container}>
       <ScrollView style={styles.mainContent}>
-        <View style={{ flexDirection: 'row' }}>
+        <View style={{ flexDirection: "row" }}>
           <Ionicons name="heart" size={40} color="pink" />
           <Text style={styles.sectionTitle}>Favorite Books</Text>
         </View>
@@ -48,9 +57,9 @@ export default function Favorites() {
         </Text>
         <View style={styles.grid}>
           {loading ? (
-            <Text style={{ color: '#aaa', fontSize: 18 }}>Loading...</Text>
+            <Text style={{ color: "#aaa", fontSize: 18 }}>Loading...</Text>
           ) : favoriteBooks.length === 0 ? (
-            <Text style={{ color: '#aaa', fontSize: 18 }}>
+            <Text style={{ color: "#aaa", fontSize: 18 }}>
               No favorite books found.
             </Text>
           ) : (
@@ -58,13 +67,26 @@ export default function Favorites() {
               <View key={book.id} style={styles.card}>
                 <View style={styles.cardHeader}>
                   <Text style={styles.cardTitle}>{book.title}</Text>
-                  <Ionicons name="heart" size={40} color="pink" />
+                  <Ionicons
+                    name="heart"
+                    size={40}
+                    color="pink"
+                    style={styles.Icon}
+                  />
                 </View>
                 <View style={styles.cardBody}>
                   <Text style={styles.cardSubject}>{book.subject}</Text>
-                  <Ionicons name="book" size={40} color="#ccc" />
+                  <Ionicons
+                    name="book"
+                    size={40}
+                    color="#ccc"
+                    style={styles.Icon}
+                  />
                 </View>
-                <TouchableOpacity style={styles.button}>
+                <TouchableOpacity
+                  style={styles.button}
+                  onPress={() => setSelectedBook(book.id)}
+                >
                   <MaterialIcons name="menu-book" size={30} color="#fff" />
                   <Text style={styles.buttonText}>Continue</Text>
                 </TouchableOpacity>
@@ -76,71 +98,80 @@ export default function Favorites() {
     </View>
   );
 }
-  
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: "#121212",
   },
   mainContent: {
     flex: 1,
     padding: 20,
   },
   sectionTitle: {
-    color: '#43B0FF',
+    color: "#43B0FF",
     fontSize: 26,
-    fontWeight: 'bold',
+    fontWeight: "bold",
     marginLeft: 10,
   },
   subTitle: {
-    color: '#aaa',
+    color: "#aaa",
     fontSize: 22,
     marginTop: 5,
   },
   grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
     marginTop: 20,
   },
   card: {
-    backgroundColor: '#1E1E2E',
+    backgroundColor: "#1E1E2E",
     borderRadius: 12,
-    width: '49%',
-    padding: 15,
+    width: "49%",
+    padding: 14,
     marginBottom: 15,
   },
   cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   cardTitle: {
-    color: '#fff',
-    fontSize: 28,
-    fontWeight: 'bold',
+    color: "#fff",
+    fontSize: 24,
+    fontWeight: "bold",
   },
   cardBody: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 8,
-    marginBottom: 12,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 10,
+    marginLeft: 5,
   },
   cardSubject: {
-    color: '#ccc',
-    fontSize: 24,
+    color: "#ccc",
+    fontSize: 20,
+  },
+  Icon: {
+    backgroundColor: "#2A2A3C",
+    padding: 12,
+    borderRadius: 30,
+    alignItems: "center",
+    justifyContent: "center",
+    elevation: 5,
   },
   button: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#2979FF',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#2979FF",
     borderRadius: 8,
     paddingVertical: 8,
+    marginTop: 15,
   },
   buttonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 24,
     marginLeft: 6,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });
