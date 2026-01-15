@@ -1,7 +1,11 @@
-import WelcomeHeader from "@/components/WelcomeHeader";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
+import {
+  ALERT_TYPE,
+  AlertNotificationRoot,
+  Dialog,
+} from "react-native-alert-notification";
 import { studentProgressApi } from "../api/studentapi/progressActiivityApi";
 
 export default function MyProgress() {
@@ -14,10 +18,20 @@ export default function MyProgress() {
       if (response.success) {
         setProgress(response.data);
       } else {
-        console.error("Error fetching Progress:", response.message);
+        Dialog.show({
+          type: ALERT_TYPE.DANGER,
+          title: "Error",
+          textBody: response.message || "Failed to submit concern",
+          button: "OK",
+        });
       }
     } catch (error: any) {
-      console.error("Error fetching Progress:", error.message);
+      Dialog.show({
+        type: ALERT_TYPE.DANGER,
+        title: "Error",
+        textBody: error.message || "Failed to submit concern",
+        button: "OK",
+      });
     } finally {
       setLoading(false);
     }
@@ -52,7 +66,11 @@ export default function MyProgress() {
         {
           id: 3,
           title: "Last Activity",
-          value: new Date(progress.lastActivity).toLocaleString(),
+          value: new Date(progress.lastActivity).toLocaleDateString("en-IN", {
+            year: "numeric",
+            month: "short",
+            day: "2-digit",
+          }),
           icon: { lib: "Ionicons", name: "time", color: "#FF6584" },
         },
       ]
@@ -75,72 +93,73 @@ export default function MyProgress() {
       }))
     : [];
   return (
-    <View style={styles.container}>
-      <ScrollView style={styles.mainContent}>
-        <WelcomeHeader />
-        <Text style={styles.sectionTitle}>📊 My Progress</Text>
-        <Text style={styles.subTitle}>
-          Track your study activity and performance over time.
-        </Text>
-        <View style={styles.statsContainer}>
-          {stats.map((s) => (
-            <View key={s.id} style={styles.statCard}>
-              <View style={styles.iconWrapper}>
-                {s.icon.lib === "MaterialIcons" ? (
-                  <MaterialIcons
-                    name={s.icon.name as any}
-                    size={32}
-                    color={s.icon.color}
-                  />
-                ) : (
-                  <Ionicons
-                    name={s.icon.name as any}
-                    size={32}
-                    color={s.icon.color}
-                  />
-                )}
-              </View>
+    <AlertNotificationRoot>
+      <View style={styles.container}>
+        <ScrollView style={styles.mainContent}>
+          <Text style={styles.sectionTitle}>📊 My Progress</Text>
+          <Text style={styles.subTitle}>
+            Track your study activity and performance over time.
+          </Text>
+          <View style={styles.statsContainer}>
+            {stats.map((s) => (
+              <View key={s.id} style={styles.statCard}>
+                <View style={styles.iconWrapper}>
+                  {s.icon.lib === "MaterialIcons" ? (
+                    <MaterialIcons
+                      name={s.icon.name as any}
+                      size={32}
+                      color={s.icon.color}
+                    />
+                  ) : (
+                    <Ionicons
+                      name={s.icon.name as any}
+                      size={32}
+                      color={s.icon.color}
+                    />
+                  )}
+                </View>
 
-              <View style={styles.statTextContainer}>
-                <Text style={styles.statTitle}>{s.title}</Text>
-                <Text style={styles.statValue}>{s.value}</Text>
+                <View style={styles.statTextContainer}>
+                  <Text style={styles.statTitle}>{s.title}</Text>
+                  <Text style={styles.statValue}>{s.value}</Text>
+                </View>
               </View>
-            </View>
-          ))}
-        </View>
+            ))}
+          </View>
 
-        <View style={styles.progressSection}>
-          <Text style={styles.progressTitle}>📚 Subject-wise Progress</Text>
-          {progressData.map((item, idx) => (
-            <View key={idx} style={styles.progressItem}>
-              <Text style={styles.progressLabel}>{item.subject}</Text>
-              <View style={styles.progressBarBackground}>
-                <View
-                  style={[
-                    styles.progressBarFill,
-                    { width: `${item.percent}%` },
-                  ]}
-                />
+          <View style={styles.progressSection}>
+            <Text style={styles.progressTitle}>📚 Subject-wise Progress</Text>
+            {progressData.map((item, idx) => (
+              <View key={idx} style={styles.progressItem}>
+                <Text style={styles.progressLabel}>{item.subject}</Text>
+                <View style={styles.progressBarBackground}>
+                  <View
+                    style={[
+                      styles.progressBarFill,
+                      { width: `${item.percent}%` },
+                    ]}
+                  />
+                </View>
+                <Text style={styles.progressPercent}>{item.percent}%</Text>
               </View>
-              <Text style={styles.progressPercent}>{item.percent}%</Text>
-            </View>
-          ))}
-        </View>
-        <View style={styles.recentSection}>
-          <Text style={styles.recentTitle}>🕒 Recently Accessed</Text>
-          {recentFiles.map(
-            (file: { id: number; name: string; date: string }) => (
-              <Text key={file.id} style={styles.recentItem}>
-                <Text style={{ color: "#43B0FF", fontWeight: "bold" }}>
-                  PDF:
-                </Text>{" "}
-                {file.name} ({file.date})
-              </Text>
-            )
-          )}
-        </View>
-      </ScrollView>
-    </View>
+            ))}
+          </View>
+          <View style={styles.recentSection}>
+            <Text style={styles.recentTitle}>🕒 Recently Accessed</Text>
+            {recentFiles.map(
+              (file: { id: number; name: string; date: string }) => (
+                <Text key={file.id} style={styles.recentItem}>
+                  <Text style={{ color: "#43B0FF", fontWeight: "bold" }}>
+                    PDF:
+                  </Text>{" "}
+                  {file.name} ({file.date})
+                </Text>
+              )
+            )}
+          </View>
+        </ScrollView>
+      </View>
+    </AlertNotificationRoot>
   );
 }
 
@@ -156,17 +175,17 @@ const styles = StyleSheet.create({
   sectionTitle: {
     color: "#43FF9B",
     fontSize: 28,
-    marginTop: 20,
   },
   subTitle: {
     color: "#aaa",
     fontSize: 24,
     marginTop: 5,
-    marginBottom: 20,
+    marginBottom: 10,
   },
   statsContainer: {
     flexDirection: "row",
     justifyContent: "space-between",
+    gap: 10,
   },
   statCard: {
     flex: 1,
@@ -180,6 +199,7 @@ const styles = StyleSheet.create({
     shadowRadius: 6,
     elevation: 6,
     paddingLeft: 8,
+    paddingVertical: 12,
   },
   iconWrapper: {
     width: 50,
@@ -191,9 +211,8 @@ const styles = StyleSheet.create({
   },
   statValue: {
     color: "#fff",
-    fontSize: 30,
+    fontSize: 22,
     fontWeight: "bold",
-    marginTop: 4,
     textAlign: "center",
   },
   statTextContainer: {
