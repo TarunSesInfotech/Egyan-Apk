@@ -8,6 +8,11 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import {
+  ALERT_TYPE,
+  AlertNotificationRoot,
+  Dialog,
+} from "react-native-alert-notification";
 import { studentRecentActivity } from "../api/studentapi/recentActivityApi";
 
 export default function RecentActivity() {
@@ -35,10 +40,20 @@ export default function RecentActivity() {
         });
         setBooks(formattedBooks);
       } else {
-        console.error("Error fetching recent-books:", response.message);
+        Dialog.show({
+          type: ALERT_TYPE.DANGER,
+          title: "Error",
+          textBody: response.message || "Failed to submit concern",
+          button: "OK",
+        });
       }
     } catch (error: any) {
-      console.error("Error fetching recent-books:", error.message);
+      Dialog.show({
+        type: ALERT_TYPE.DANGER,
+        title: "Error",
+        textBody: error.message || "Failed to submit concern",
+        button: "OK",
+      });
     } finally {
       setLoading(false);
     }
@@ -48,75 +63,74 @@ export default function RecentActivity() {
   }, []);
 
   if (selectedBook) {
-     const bookData = books.find((b) => b.id === selectedBook);
+    const bookData = books.find((b) => b.id === selectedBook);
     return (
-      <BookDetailScreen
-         data={bookData}
-        onBack={() => setSelectedBook(false)}
-      />
+      <BookDetailScreen data={bookData} onBack={() => setSelectedBook(false)} />
     );
   }
   return (
-    <View style={styles.container}>
-      <ScrollView style={styles.mainContent}>
-        <View style={styles.sectionHeader}>
-          <Ionicons name="book" size={40} color="#43B0FF" />
-          <Text style={styles.sectionTitle}>Recently Read Books</Text>
-        </View>
-        <Text style={styles.subTitle}>
-          View your recently accessed digital books with reading progress.
-        </Text>
-        <View style={styles.grid}>
-          {loading ? (
-            <Text style={{ color: "#aaa", fontSize: 18 }}>Loading...</Text>
-          ) : books.length === 0 ? (
-            <Text style={{ color: "#aaa", fontSize: 18 }}>
-              No recent activity found.
-            </Text>
-          ) : (
-            books.map((book) => (
-              <View key={book.id} style={styles.card}>
-                <View style={styles.cardHeader}>
-                  <Text style={styles.cardTitle}>{book.title}</Text>
-                  <Text style={styles.cardSubject}>{book.subject}</Text>
+    <AlertNotificationRoot>
+      <View style={styles.container}>
+        <ScrollView style={styles.mainContent}>
+          <View style={styles.sectionHeader}>
+            <Ionicons name="book" size={40} color="#43B0FF" />
+            <Text style={styles.sectionTitle}>Recently Read Books</Text>
+          </View>
+          <Text style={styles.subTitle}>
+            View your recently accessed digital books with reading progress.
+          </Text>
+          <View style={styles.grid}>
+            {loading ? (
+              <Text style={{ color: "#aaa", fontSize: 18 }}>Loading...</Text>
+            ) : books.length === 0 ? (
+              <Text style={{ color: "#aaa", fontSize: 18 }}>
+                No recent activity found.
+              </Text>
+            ) : (
+              books.map((book) => (
+                <View key={book.id} style={styles.card}>
+                  <View style={styles.cardHeader}>
+                    <Text style={styles.cardTitle}>{book.title}</Text>
+                    <Text style={styles.cardSubject}>{book.subject}</Text>
+                  </View>
+                  <View style={styles.cardHeader}>
+                    <Text style={styles.progressText}>Progress</Text>
+                    <Text style={styles.progressPercent}>{book.progress}%</Text>
+                  </View>
+                  <View style={styles.progressBarBackground}>
+                    <View
+                      style={[
+                        styles.progressBarFill,
+                        { width: `${book.progress}%` },
+                      ]}
+                    />
+                  </View>
+                  <Text style={styles.lastAccessed}>
+                    Last Accessed Date : {book.lastAccessedDate}
+                  </Text>
+                  <Text style={styles.lastAccessed}>
+                    Last Accessed Time : {book.lastAccessedTime}
+                  </Text>
+                  <TouchableOpacity
+                    style={styles.button}
+                    onPress={() => setSelectedBook(book.id)}
+                  >
+                    <MaterialIcons name="menu-book" size={28} color="#fff" />
+                    <Text style={styles.buttonText}>Continue Reading</Text>
+                    <Ionicons
+                      name="arrow-forward"
+                      size={30}
+                      color="#fff"
+                      style={styles.icon}
+                    />
+                  </TouchableOpacity>
                 </View>
-                <View style={styles.cardHeader}>
-                  <Text style={styles.progressText}>Progress</Text>
-                  <Text style={styles.progressPercent}>{book.progress}%</Text>
-                </View>
-                <View style={styles.progressBarBackground}>
-                  <View
-                    style={[
-                      styles.progressBarFill,
-                      { width: `${book.progress}%` },
-                    ]}
-                  />
-                </View>
-                <Text style={styles.lastAccessed}>
-                  Last Accessed Date : {book.lastAccessedDate}
-                </Text>
-                <Text style={styles.lastAccessed}>
-                  Last Accessed Time : {book.lastAccessedTime}
-                </Text>
-                <TouchableOpacity
-                  style={styles.button}
-                  onPress={() => setSelectedBook(book.id)}
-                >
-                  <MaterialIcons name="menu-book" size={28} color="#fff" />
-                  <Text style={styles.buttonText}>Continue Reading</Text>
-                  <Ionicons
-                    name="arrow-forward"
-                    size={30}
-                    color="#fff"
-                    style={styles.icon}
-                  />
-                </TouchableOpacity>
-              </View>
-            ))
-          )}
-        </View>
-      </ScrollView>
-    </View>
+              ))
+            )}
+          </View>
+        </ScrollView>
+      </View>
+    </AlertNotificationRoot>
   );
 }
 

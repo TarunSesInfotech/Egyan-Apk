@@ -35,7 +35,6 @@ export default function MyProgress() {
       </View>
     );
   }
-  console.log('progress :>> ', progress);
   const stats = progress
     ? [
         {
