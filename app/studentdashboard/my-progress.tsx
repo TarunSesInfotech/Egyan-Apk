@@ -1,3 +1,4 @@
+import SubjectWiseProgress from "@/components/studentcomponents/SubjectWiseProgress";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useEffect, useState } from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
@@ -7,6 +8,13 @@ import {
   Dialog,
 } from "react-native-alert-notification";
 import { studentProgressApi } from "../api/studentapi/progressActiivityApi";
+
+interface Recentfile {
+  id: number;
+  name: string;
+  date: string;
+  bookClass: string;
+}
 
 export default function MyProgress() {
   const [progress, setProgress] = useState<any>("");
@@ -81,17 +89,23 @@ export default function MyProgress() {
         ([subject, data]: any) => ({
           subject,
           percent: data.percentage,
+          books: data.books,
         })
       )
     : [];
-
   const recentFiles = progress
     ? progress.recentActivity.map((item: any, idx: number) => ({
         id: idx + 1,
         name: item.title,
-        date: new Date(item.time).toLocaleString(),
+        date: new Date(item.time).toLocaleString("en-IN", {
+          day: "2-digit",
+          month: "numeric",
+          year: "numeric",
+        }),
+        bookClass: item.bookClass,
       }))
     : [];
+
   return (
     <AlertNotificationRoot>
       <View style={styles.container}>
@@ -127,35 +141,24 @@ export default function MyProgress() {
             ))}
           </View>
 
-          <View style={styles.progressSection}>
-            <Text style={styles.progressTitle}>📚 Subject-wise Progress</Text>
-            {progressData.map((item, idx) => (
-              <View key={idx} style={styles.progressItem}>
-                <Text style={styles.progressLabel}>{item.subject}</Text>
-                <View style={styles.progressBarBackground}>
-                  <View
-                    style={[
-                      styles.progressBarFill,
-                      { width: `${item.percent}%` },
-                    ]}
-                  />
-                </View>
-                <Text style={styles.progressPercent}>{item.percent}%</Text>
+          <SubjectWiseProgress data={progressData} />
+
+          <View style={styles.recentSection}>
+            <View style={styles.recentHeader}>
+              <Ionicons name="time-outline" size={28} color="#fff" />
+              <Text style={styles.recentTitle}>Recently Accessed</Text>
+            </View>
+
+            {recentFiles.map((file: Recentfile) => (
+              <View key={file.id} style={styles.recentCard}>
+                <Text style={styles.recentBookName}>
+                  <Text style={{ fontWeight: "bold" }}>PDF:</Text> {file.name}
+                </Text>
+                <Text style={styles.recentMeta}>
+                  {file.bookClass} : {file.date}
+                </Text>
               </View>
             ))}
-          </View>
-          <View style={styles.recentSection}>
-            <Text style={styles.recentTitle}>🕒 Recently Accessed</Text>
-            {recentFiles.map(
-              (file: { id: number; name: string; date: string }) => (
-                <Text key={file.id} style={styles.recentItem}>
-                  <Text style={{ color: "#43B0FF", fontWeight: "bold" }}>
-                    PDF:
-                  </Text>{" "}
-                  {file.name} ({file.date})
-                </Text>
-              )
-            )}
           </View>
         </ScrollView>
       </View>
@@ -224,61 +227,41 @@ const styles = StyleSheet.create({
     marginTop: 5,
     textAlign: "center",
   },
-  progressSection: {
-    marginTop: 20,
-    padding: 15,
-    backgroundColor: "#1E1E2E",
-    borderRadius: 12,
+  recentSection: {
+    marginTop: 10,
+    padding: 18,
+    backgroundColor: "#2A2A3A",
+    borderRadius: 16,
+    marginBottom: 60,
   },
-  progressTitle: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: "#43FF9B",
-    marginBottom: 15,
-  },
-  progressItem: {
+
+  recentHeader: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 20,
-  },
-  progressLabel: {
-    color: "#fff",
-    flex: 1,
-    fontSize: 18,
-  },
-  progressBarBackground: {
-    flex: 4,
-    height: 8,
-    backgroundColor: "#333",
-    borderRadius: 5,
-    marginHorizontal: 10,
-  },
-  progressBarFill: {
-    height: 8,
-    backgroundColor: "#43FF9B",
-    borderRadius: 5,
-  },
-  progressPercent: {
-    color: "#ccc",
-    width: 40,
-    textAlign: "right",
-    fontSize: 18,
-  },
-  recentSection: {
-    marginTop: 20,
-    padding: 15,
-    backgroundColor: "#1E1E2E",
-    borderRadius: 12,
-  },
-  recentTitle: {
-    fontSize: 30,
-    fontWeight: "bold",
-    color: "#FF5C8A",
+    gap: 8,
     marginBottom: 10,
   },
-  recentItem: {
-    color: "#ccc",
-    fontSize: 24,
-    marginBottom: 16,
+
+  recentTitle: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#fff",
+  },
+
+  recentCard: {
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#3A3A4D",
+  },
+
+  recentBookName: {
+    color: "#fff",
+    fontSize: 18,
+  },
+
+  recentMeta: {
+    color: "#9CA3AF",
+    fontSize: 16,
+    textAlign: "right",
   },
 });

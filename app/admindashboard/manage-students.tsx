@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import StudentCard from '@/components/StudentCard';
 import StudentModal from '@/components/StudentModal';
 import { Ionicons } from '@expo/vector-icons';
