@@ -1,3 +1,4 @@
+ 
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -64,20 +65,20 @@ function CustomDrawerContent(props: DrawerContentComponentProps) {
           height: 70,
           justifyContent: 'center',
         }}
-      />
+      /> */}
       <DrawerItem
         label="Profile Settings"
-        labelStyle={{ color: '#fff', fontSize: 24 }}
-        icon={() => <Ionicons name="person-circle" size={30} color={'#fff'} />}
-        onPress={() => {}}
+        labelStyle={{ color: "#fff", fontSize: 24 }}
+        icon={() => <Ionicons name="person-circle" size={30} color={"#fff"} />}
         style={{
           marginBottom: 16,
-          backgroundColor: '#3572ef',
+          backgroundColor: "#3572ef",
           borderRadius: 12,
           height: 70,
-          justifyContent: 'center',
+          justifyContent: "center",
         }}
-      /> */}
+        onPress={() => router.push("/studentdashboard/profile-settings")}
+      />
       <DrawerItem
         label="Logout"
         labelStyle={{ color: "#fff", fontSize: 24 }}
@@ -135,16 +136,6 @@ export default function StudentDrawerLayout() {
           }}
         />
         {/* <Drawer.Screen
-          name="my-courses"
-          options={{
-            drawerLabel: "My Courses",
-            title: "My Courses",
-            drawerIcon: ({ color }) => (
-              <Ionicons name="book" size={30} color={color} />
-            ),
-          }}
-        /> */}
-        <Drawer.Screen
           name="my-books"
           options={{
             drawerLabel: "My Books",
@@ -153,7 +144,7 @@ export default function StudentDrawerLayout() {
               <Ionicons name="book" size={30} color={color} />
             ),
           }}
-        />
+        /> */}
         <Drawer.Screen
           name="my-progress"
           options={{
@@ -192,6 +183,12 @@ export default function StudentDrawerLayout() {
             drawerIcon: ({ color }) => (
               <Ionicons name="help-circle" size={30} color={color} />
             ),
+          }}
+        />
+        <Drawer.Screen
+          name="profile-settings"
+          options={{
+            drawerItemStyle: { display: "none" },
           }}
         />
       </Drawer>

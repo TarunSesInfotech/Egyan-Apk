@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable react-hooks/exhaustive-deps */
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
@@ -88,7 +90,7 @@ export default function Home() {
       Dialog.show({
         type: ALERT_TYPE.DANGER,
         title: 'Login Failed',
-        textBody: result.message || 'Invalid username or password.',
+        textBody: 'Invalid username or password.',
         button: 'Try Again',
       });
     }
