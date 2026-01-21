@@ -3,11 +3,11 @@ import {
   Adminannoucements,
   DeleteAnnouncement,
   UpdateAnnouncement,
-} from '@/app/api/adminapi/adminAnnouncements';
-import Announcementmodel from '@/components/Announcementmodel';
-import { MaterialIcons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useEffect, useState } from 'react';
+} from "@/app/api/adminapi/adminAnnouncements";
+import Announcementmodel from "@/components/admincomponents/Announcementmodel";
+import { MaterialIcons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -15,19 +15,19 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-} from 'react-native';
+} from "react-native";
 import {
   ALERT_TYPE,
   AlertNotificationRoot,
   Dialog,
-} from 'react-native-alert-notification';
+} from "react-native-alert-notification";
 
 export default function Announcementview() {
   const [announcements, setAnnouncements] = useState([]);
 
-  const [newAnnouncement, setNewAnnouncement] = useState('');
+  const [newAnnouncement, setNewAnnouncement] = useState("");
   const [isModalVisible, setModalVisible] = useState(false);
-  const [editText, setEditText] = useState('');
+  const [editText, setEditText] = useState("");
   const [editId, setEditId] = useState(null);
 
   const fetchannoucements = async () => {
@@ -38,17 +38,17 @@ export default function Announcementview() {
       } else {
         Dialog.show({
           type: ALERT_TYPE.DANGER,
-          title: 'Error fetching annoucements',
+          title: "Error fetching annoucements",
           textBody: response.message,
-          button: 'Try Again',
+          button: "Try Again",
         });
       }
     } catch (error: any) {
       Dialog.show({
         type: ALERT_TYPE.DANGER,
-        title: 'Upload Failed',
+        title: "Upload Failed",
         textBody: error.message,
-        button: 'Try Again',
+        button: "Try Again",
       });
     }
   };
@@ -61,14 +61,14 @@ export default function Announcementview() {
     if (!newAnnouncement.trim()) {
       Dialog.show({
         type: ALERT_TYPE.WARNING,
-        title: 'Empty announcement',
-        textBody: 'Please write something first.',
-        button: 'OK',
+        title: "Empty announcement",
+        textBody: "Please write something first.",
+        button: "OK",
       });
       return;
     }
     try {
-      const token = await AsyncStorage.getItem('token');
+      const token = await AsyncStorage.getItem("token");
       const response = await addAnnoucements({
         text: newAnnouncement,
         token,
@@ -77,55 +77,55 @@ export default function Announcementview() {
       if (response.success) {
         Dialog.show({
           type: ALERT_TYPE.SUCCESS,
-          title: 'Success',
-          textBody: 'Announcement added successfully',
-          button: 'OK',
+          title: "Success",
+          textBody: "Announcement added successfully",
+          button: "OK",
         });
 
-        setNewAnnouncement('');
+        setNewAnnouncement("");
         fetchannoucements();
       } else {
         Dialog.show({
           type: ALERT_TYPE.DANGER,
-          title: 'Failed',
+          title: "Failed",
           textBody: response.message,
-          button: 'OK',
+          button: "OK",
         });
       }
     } catch (error) {
       Dialog.show({
         type: ALERT_TYPE.DANGER,
-        title: 'Error',
+        title: "Error",
         textBody:
-          error instanceof Error ? error.message : 'An unknown error occurred',
-        button: 'OK',
+          error instanceof Error ? error.message : "An unknown error occurred",
+        button: "OK",
       });
     }
   };
 
-  const handleDelete = async (announcementId: Number) => {
+  const handleDelete = async (announcementId: number) => {
     Dialog.show({
       type: ALERT_TYPE.WARNING,
-      title: 'Confirm Delete',
-      textBody: 'Are you sure you want to delete this annoucements?',
-      button: 'Delete',
+      title: "Confirm Delete",
+      textBody: "Are you sure you want to delete this annoucements?",
+      button: "Delete",
       onHide: async () => {
-        const token = await AsyncStorage.getItem('token');
+        const token = await AsyncStorage.getItem("token");
         const response = await DeleteAnnouncement(announcementId, token);
         if (response.success) {
           Dialog.show({
             type: ALERT_TYPE.SUCCESS,
-            title: 'Deleted',
-            textBody: 'Annoucements item deleted successfully!',
-            button: 'OK',
+            title: "Deleted",
+            textBody: "Annoucements item deleted successfully!",
+            button: "OK",
             onHide: fetchannoucements,
           });
         } else {
           Dialog.show({
             type: ALERT_TYPE.DANGER,
-            title: 'Error',
-            textBody: response.message || 'Delete failed.',
-            button: 'Close',
+            title: "Error",
+            textBody: response.message || "Delete failed.",
+            button: "Close",
           });
         }
       },
@@ -136,45 +136,45 @@ export default function Announcementview() {
     if (!editText.trim()) {
       Dialog.show({
         type: ALERT_TYPE.WARNING,
-        title: 'Empty text',
-        textBody: 'Announcement text cannot be empty.',
-        button: 'OK',
+        title: "Empty text",
+        textBody: "Announcement text cannot be empty.",
+        button: "OK",
       });
       return;
     }
 
     try {
-      const token = await AsyncStorage.getItem('token');
+      const token = await AsyncStorage.getItem("token");
 
       const response = await UpdateAnnouncement(editId, token, editText);
 
       if (response.success) {
         Dialog.show({
           type: ALERT_TYPE.SUCCESS,
-          title: 'Updated',
-          textBody: 'Announcement updated successfully',
-          button: 'OK',
+          title: "Updated",
+          textBody: "Announcement updated successfully",
+          button: "OK",
           onHide: () => {
             setModalVisible(false);
             setEditId(null);
-            setEditText('');
+            setEditText("");
             fetchannoucements();
           },
         });
       } else {
         Dialog.show({
           type: ALERT_TYPE.DANGER,
-          title: 'Update failed',
+          title: "Update failed",
           textBody: response.message,
-          button: 'OK',
+          button: "OK",
         });
       }
     } catch (error: any) {
       Dialog.show({
         type: ALERT_TYPE.DANGER,
-        title: 'Error',
+        title: "Error",
         textBody: error.message,
-        button: 'OK',
+        button: "OK",
       });
     }
   };
@@ -260,28 +260,28 @@ export default function Announcementview() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: "#121212",
     padding: 20,
   },
   title: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 30,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   subtitle: {
-    color: '#9ca3af',
+    color: "#9ca3af",
     fontSize: 18,
     marginBottom: 20,
   },
   topRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 20,
   },
   input: {
     flex: 1,
-    backgroundColor: '#1e1e1e',
-    color: '#fff',
+    backgroundColor: "#1e1e1e",
+    color: "#fff",
     borderRadius: 10,
     paddingHorizontal: 15,
     paddingVertical: 10,
@@ -290,89 +290,89 @@ const styles = StyleSheet.create({
   },
 
   addButton: {
-    backgroundColor: '#3b82f6',
+    backgroundColor: "#3b82f6",
     paddingVertical: 10,
     paddingHorizontal: 14,
     borderRadius: 8,
   },
   addButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   cardContainer: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
     gap: 15,
   },
   card: {
-    backgroundColor: '#1e1e1e',
+    backgroundColor: "#1e1e1e",
     borderRadius: 10,
     padding: 15,
-    width: '49%',
+    width: "49%",
     height: 140,
   },
   cardHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   cardText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 20,
     flexShrink: 1,
   },
   badge: {
-    backgroundColor: '#3b82f6',
+    backgroundColor: "#3b82f6",
     paddingVertical: 4,
     paddingHorizontal: 8,
     borderRadius: 6,
   },
   badgeText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   cardFooter: {
     marginTop: 50,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
   },
   dateRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 4,
   },
   dateText: {
-    color: '#9ca3af',
+    color: "#9ca3af",
     fontSize: 18,
   },
   buttonRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 8,
   },
   editButton: {
-    backgroundColor: '#f59e0b',
+    backgroundColor: "#f59e0b",
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 6,
   },
   deleteButton: {
-    backgroundColor: '#ef4444',
+    backgroundColor: "#ef4444",
     paddingVertical: 5,
     paddingHorizontal: 10,
     borderRadius: 6,
   },
   editText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: "#fff",
+    fontWeight: "bold",
     fontSize: 18,
   },
   deleteText: {
-    color: '#fff',
-    fontWeight: 'bold',
+    color: "#fff",
+    fontWeight: "bold",
     fontSize: 18,
   },
 });

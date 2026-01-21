@@ -1,7 +1,7 @@
-import UpdateRoleModal from '@/components/UpdateRoleModal';
-import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useEffect, useState } from 'react';
+import UpdateRoleModal from "@/components/admincomponents/UpdateRoleModal";
+import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -9,27 +9,27 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-} from 'react-native';
+} from "react-native";
 import {
   ALERT_TYPE,
   AlertNotificationRoot,
   Dialog,
-} from 'react-native-alert-notification';
-import { Dropdown } from 'react-native-element-dropdown';
+} from "react-native-alert-notification";
+import { Dropdown } from "react-native-element-dropdown";
 import {
   updateUserRole,
   userRoleDeleteApi,
   userRoleOverview,
-} from '../api/adminapi/adminDashboard';
+} from "../api/adminapi/adminDashboard";
 
 export default function RoleManagement() {
   const [userroleData, setUserRoleData] = useState<any[]>([]);
-  const [roleFilter, setRoleFilter] = useState('all');
-  const [search, setSearch] = useState('');
+  const [roleFilter, setRoleFilter] = useState("all");
+  const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [isModalVisible, setModalVisible] = useState(false);
   const [selectedUser, setSelectedUser] = useState<any>(null);
-  const [newRole, setNewRole] = useState('');
+  const [newRole, setNewRole] = useState("");
   const itemsPerPage = 16;
 
   // Fetch all roles
@@ -43,17 +43,17 @@ export default function RoleManagement() {
       } else {
         Dialog.show({
           type: ALERT_TYPE.DANGER,
-          title: 'Error',
-          textBody: response.message || 'Delete failed.',
-          button: 'Close',
+          title: "Error",
+          textBody: response.message || "Delete failed.",
+          button: "Close",
         });
       }
     } catch (error: any) {
       Dialog.show({
         type: ALERT_TYPE.DANGER,
-        title: 'Error fetching UserRole data:',
-        textBody: error.message || 'Delete failed.',
-        button: 'Close',
+        title: "Error fetching UserRole data:",
+        textBody: error.message || "Delete failed.",
+        button: "Close",
       });
     }
   };
@@ -64,33 +64,33 @@ export default function RoleManagement() {
 
   const updateLocalUserStatus = (id: any, isActive: boolean) => {
     setUserRoleData((prev) =>
-      prev.map((u) => (u.id === id ? { ...u, isActive } : u))
+      prev.map((u) => (u.id === id ? { ...u, isActive } : u)),
     );
   };
 
   const handleDeleteUser = async (userId: any) => {
     Dialog.show({
       type: ALERT_TYPE.WARNING,
-      title: 'Confirm Delete',
-      textBody: 'Are you sure you want to delete this User?',
-      button: 'Delete',
+      title: "Confirm Delete",
+      textBody: "Are you sure you want to delete this User?",
+      button: "Delete",
       onHide: async () => {
-        const token = await AsyncStorage.getItem('token');
+        const token = await AsyncStorage.getItem("token");
         const response = await userRoleDeleteApi(token, userId);
         if (response.success) {
           Dialog.show({
             type: ALERT_TYPE.SUCCESS,
-            title: 'Deleted',
-            textBody: 'User deleted successfully!',
-            button: 'OK',
+            title: "Deleted",
+            textBody: "User deleted successfully!",
+            button: "OK",
             onHide: fetchUserRole,
           });
         } else {
           Dialog.show({
             type: ALERT_TYPE.DANGER,
-            title: 'Error',
-            textBody: response.message || 'Delete failed.',
-            button: 'Close',
+            title: "Error",
+            textBody: response.message || "Delete failed.",
+            button: "Close",
           });
         }
       },
@@ -101,16 +101,16 @@ export default function RoleManagement() {
     id: u.id,
     name: u.username,
     email: u.email,
-    role: u.role ? u.role.charAt(0).toUpperCase() + u.role.slice(1) : 'N/A',
+    role: u.role ? u.role.charAt(0).toUpperCase() + u.role.slice(1) : "N/A",
     isActive: u.isActive,
   }));
 
   const filteredUsers = formattedUsers.filter(
     (u) =>
-      (roleFilter === 'all' ||
+      (roleFilter === "all" ||
         u.role.toLowerCase() === roleFilter.toLowerCase()) &&
       (u.name.toLowerCase().includes(search.toLowerCase()) ||
-        u.email.toLowerCase().includes(search.toLowerCase()))
+        u.email.toLowerCase().includes(search.toLowerCase())),
   );
 
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
@@ -137,19 +137,19 @@ export default function RoleManagement() {
   const handleUpdateUser = async () => {
     if (!selectedUser) return;
 
-    const token = await AsyncStorage.getItem('token');
+    const token = await AsyncStorage.getItem("token");
     const res = await updateUserRole(
       selectedUser.id,
       token,
       newRole,
-      selectedUser.isActive
+      selectedUser.isActive,
     );
     if (res.success) {
       Dialog.show({
         type: ALERT_TYPE.SUCCESS,
-        title: 'Updated',
-        textBody: 'User role updated successfully!',
-        button: 'OK',
+        title: "Updated",
+        textBody: "User role updated successfully!",
+        button: "OK",
         onHide: () => {
           fetchUserRole();
           setModalVisible(false);
@@ -158,19 +158,19 @@ export default function RoleManagement() {
     } else {
       Dialog.show({
         type: ALERT_TYPE.DANGER,
-        title: 'Error',
+        title: "Error",
         textBody: res.message,
-        button: 'Close',
+        button: "Close",
       });
     }
   };
 
   const roleOptions = [
-    { label: 'All Roles', value: 'all' },
-    { label: 'Admin', value: 'admin' },
-    { label: 'Student', value: 'student' },
-    { label: 'Teacher', value: 'teacher' },
-    { label: 'Principal', value: 'principal' },
+    { label: "All Roles", value: "all" },
+    { label: "Admin", value: "admin" },
+    { label: "Student", value: "student" },
+    { label: "Teacher", value: "teacher" },
+    { label: "Principal", value: "principal" },
   ];
 
   return (
@@ -196,9 +196,9 @@ export default function RoleManagement() {
               labelField="label"
               valueField="value"
               placeholder="Select Role"
-              placeholderStyle={{ color: '#999', fontSize: 20 }}
-              selectedTextStyle={{ color: '#fff', fontSize: 20 }}
-              itemTextStyle={{ color: '#000' }}
+              placeholderStyle={{ color: "#999", fontSize: 20 }}
+              selectedTextStyle={{ color: "#fff", fontSize: 20 }}
+              itemTextStyle={{ color: "#000" }}
               value={roleFilter}
               onChange={(item) => {
                 setRoleFilter(item.value);
@@ -255,12 +255,12 @@ export default function RoleManagement() {
                           styles.activeStatus,
                           {
                             backgroundColor: user.isActive
-                              ? '#00c853'
-                              : '#ff4d4d',
+                              ? "#00c853"
+                              : "#ff4d4d",
                           },
                         ]}
                       >
-                        {user.isActive ? 'Active' : 'Inactive'}
+                        {user.isActive ? "Active" : "Inactive"}
                       </Text>
                     </View>
 
@@ -362,31 +362,31 @@ export default function RoleManagement() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a1a24',
+    backgroundColor: "#1a1a24",
   },
   mainContent: {
     flex: 1,
     padding: 20,
   },
   welcomeText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 26,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   sectionTitle: {
-    color: '#aaa',
+    color: "#aaa",
     fontSize: 26,
     marginBottom: 15,
   },
   searchFilterRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginBottom: 15,
   },
   searchInput: {
     flex: 1,
-    backgroundColor: '#2b2b36',
-    color: '#fff',
+    backgroundColor: "#2b2b36",
+    color: "#fff",
     borderRadius: 6,
     paddingHorizontal: 12,
     height: 50,
@@ -394,7 +394,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   dropdown: {
-    backgroundColor: '#2b2b36',
+    backgroundColor: "#2b2b36",
     borderRadius: 6,
     height: 50,
     width: 150,
@@ -402,107 +402,107 @@ const styles = StyleSheet.create({
   },
   dropdownContainer: {
     borderRadius: 6,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   tableHeader: {
-    flexDirection: 'row',
-    backgroundColor: '#e2e5ea',
+    flexDirection: "row",
+    backgroundColor: "#e2e5ea",
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderRadius: 4,
   },
   tableHeaderText: {
-    color: '#000',
-    fontWeight: '600',
+    color: "#000",
+    fontWeight: "600",
     fontSize: 20,
   },
   tableRow: {
-    flexDirection: 'row',
-    backgroundColor: '#2b2b36',
+    flexDirection: "row",
+    backgroundColor: "#2b2b36",
     marginTop: 5,
     paddingVertical: 10,
     paddingHorizontal: 8,
     borderRadius: 4,
   },
   tableCell: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 18,
   },
   statusContainer: {
-    justifyContent: 'center',
-    alignItems: 'flex-start',
+    justifyContent: "center",
+    alignItems: "flex-start",
   },
   activeStatus: {
-    color: '#fff',
+    color: "#fff",
     paddingVertical: 4,
     paddingHorizontal: 12,
     borderRadius: 5,
     fontSize: 14,
-    textAlign: 'center',
+    textAlign: "center",
   },
   actionsContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-start',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-start",
     gap: 10,
   },
   actionButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     marginRight: 10,
   },
   changeRoleText: {
-    color: '#4da3ff',
+    color: "#4da3ff",
     fontSize: 16,
     marginLeft: 4,
   },
   deleteText: {
-    color: '#ff4d4d',
+    color: "#ff4d4d",
     fontSize: 16,
     marginLeft: 4,
   },
   paginationRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginTop: 25,
     marginBottom: 30,
   },
   paginationInfo: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 20,
   },
   paginationContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
   },
   pageButton: {
-    backgroundColor: '#4da3ff',
+    backgroundColor: "#4da3ff",
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 6,
     marginHorizontal: 5,
   },
   disabledButton: {
-    backgroundColor: '#2b2b36',
+    backgroundColor: "#2b2b36",
     opacity: 0.5,
   },
   pageButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 20,
   },
   pageNumber: {
-    backgroundColor: '#2b2b36',
+    backgroundColor: "#2b2b36",
     paddingVertical: 6,
     paddingHorizontal: 10,
     borderRadius: 6,
     marginHorizontal: 3,
   },
   activePage: {
-    backgroundColor: '#4da3ff',
+    backgroundColor: "#4da3ff",
   },
   pageNumberText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 20,
   },
   colName: { flex: 2, minWidth: 100 },

@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import StudentCard from '@/components/StudentCard';
-import StudentModal from '@/components/StudentModal';
-import { Ionicons } from '@expo/vector-icons';
-import * as FileSystem from 'expo-file-system/legacy';
-import * as Sharing from 'expo-sharing';
-import { useEffect, useState } from 'react';
+import StudentCard from "@/components/admincomponents/StudentCard";
+import StudentModal from "@/components/admincomponents/StudentModal";
+import { Ionicons } from "@expo/vector-icons";
+import * as FileSystem from "expo-file-system/legacy";
+import * as Sharing from "expo-sharing";
+import { useEffect, useState } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -12,14 +12,14 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-} from 'react-native';
+} from "react-native";
 import {
   ALERT_TYPE,
   AlertNotificationRoot,
   Dialog,
-} from 'react-native-alert-notification';
-import * as XLSX from 'xlsx';
-import { userStudentProgress } from '../api/adminapi/adminDashboard';
+} from "react-native-alert-notification";
+import * as XLSX from "xlsx";
+import { userStudentProgress } from "../api/adminapi/adminDashboard";
 
 export type Student = {
   id: number;
@@ -34,13 +34,13 @@ export type Student = {
 };
 
 export default function ManageStudents() {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [students, setStudents] = useState<Student[]>([]);
   const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
 
   const [sortVisible, setSortVisible] = useState(false);
-  const [sortType, setSortType] = useState('Name A → Z');
+  const [sortType, setSortType] = useState("Name A → Z");
 
   const fetchStudentProgress = async () => {
     try {
@@ -56,22 +56,22 @@ export default function ManageStudents() {
         }) => ({
           id: s.id,
           name: s.username,
-          email: s.email ?? '',
+          email: s.email ?? "",
           avg: s.averageProgress ?? 0,
           books: s.progressByBook.map((b, index) => ({
             name: b.bookName || `Book ${index + 1}`,
             progress: b.progress || 0,
-            color: index % 2 === 0 ? '#22c55e' : '#eab308',
+            color: index % 2 === 0 ? "#22c55e" : "#eab308",
           })),
-        })
+        }),
       );
 
       setStudents(formatted);
     } catch (err) {
       Dialog.show({
         type: ALERT_TYPE.DANGER,
-        title: 'Error fetching Manage-student',
-        button: 'Try Again',
+        title: "Error fetching Manage-student",
+        button: "Try Again",
       });
     }
   };
@@ -90,20 +90,20 @@ export default function ManageStudents() {
       student.books.some(
         (book) =>
           book.name.toLowerCase().includes(q) ||
-          book.progress.toString().includes(q)
+          book.progress.toString().includes(q),
       )
     );
   });
 
   const sortedStudents = [...filteredStudents].sort((a, b) => {
     switch (sortType) {
-      case 'Name A → Z':
+      case "Name A → Z":
         return a.name.localeCompare(b.name);
-      case 'Name Z → A':
+      case "Name Z → A":
         return b.name.localeCompare(a.name);
-      case 'Avg High → Low':
+      case "Avg High → Low":
         return b.avg - a.avg;
-      case 'Avg Low → High':
+      case "Avg Low → High":
         return a.avg - b.avg;
       default:
         return 0;
@@ -116,7 +116,7 @@ export default function ManageStudents() {
 
   const paginatedStudents = sortedStudents.slice(
     (currentPage - 1) * studentsPerPage,
-    currentPage * studentsPerPage
+    currentPage * studentsPerPage,
   );
 
   useEffect(() => {
@@ -149,25 +149,25 @@ export default function ManageStudents() {
 
       const worksheet = XLSX.utils.json_to_sheet(excelData);
       const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, 'Students');
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Students");
 
       const excelBase64 = XLSX.write(workbook, {
-        type: 'base64',
-        bookType: 'xlsx',
+        type: "base64",
+        bookType: "xlsx",
       });
 
-      const fileUri = FileSystem.documentDirectory + 'students.xlsx';
+      const fileUri = FileSystem.documentDirectory + "students.xlsx";
 
       await FileSystem.writeAsStringAsync(fileUri, excelBase64, {
-        encoding: 'base64',
+        encoding: "base64",
       });
 
       await Sharing.shareAsync(fileUri);
     } catch (error) {
       Dialog.show({
         type: ALERT_TYPE.DANGER,
-        title: 'Excel export error',
-        button: 'Try Again',
+        title: "Excel export error",
+        button: "Try Again",
       });
     }
   };
@@ -213,28 +213,28 @@ export default function ManageStudents() {
                 <View style={styles.dropdownMenu}>
                   <TouchableOpacity
                     style={styles.dropdownItem}
-                    onPress={() => applySort('Name A → Z')}
+                    onPress={() => applySort("Name A → Z")}
                   >
                     <Text style={styles.dropdownItemText}>Name A → Z</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
                     style={styles.dropdownItem}
-                    onPress={() => applySort('Name Z → A')}
+                    onPress={() => applySort("Name Z → A")}
                   >
                     <Text style={styles.dropdownItemText}>Name Z → A</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
                     style={styles.dropdownItem}
-                    onPress={() => applySort('Avg High → Low')}
+                    onPress={() => applySort("Avg High → Low")}
                   >
                     <Text style={styles.dropdownItemText}>Avg High → Low</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
                     style={styles.dropdownItem}
-                    onPress={() => applySort('Avg Low → High')}
+                    onPress={() => applySort("Avg Low → High")}
                   >
                     <Text style={styles.dropdownItemText}>Avg Low → High</Text>
                   </TouchableOpacity>
@@ -253,7 +253,7 @@ export default function ManageStudents() {
 
           <View style={styles.paginationContainer}>
             <Text style={styles.paginationText}>
-              Showing {paginatedStudents.length} students — page {currentPage}{' '}
+              Showing {paginatedStudents.length} students — page {currentPage}{" "}
               of {totalPages}
             </Text>
 
@@ -302,33 +302,33 @@ export default function ManageStudents() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: "#121212",
   },
   mainContent: {
     flex: 1,
     padding: 20,
   },
   welcomeText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   sectionTitle: {
-    color: '#aaa',
+    color: "#aaa",
     fontSize: 23,
     marginTop: 20,
     marginBottom: 15,
   },
   controlsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    alignItems: "center",
+    flexWrap: "wrap",
     gap: 10,
   },
   searchContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#1e1e1e',
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#1e1e1e",
     borderRadius: 8,
     paddingHorizontal: 14,
     height: 50,
@@ -336,30 +336,30 @@ const styles = StyleSheet.create({
     minWidth: 200,
   },
   searchInput: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 20,
     marginLeft: 6,
     flex: 1,
   },
   dropdownRow: {
-    position: 'relative',
+    position: "relative",
     width: 170,
   },
   dropdown: {
-    backgroundColor: '#1e1e1e',
+    backgroundColor: "#1e1e1e",
     paddingHorizontal: 15,
     paddingVertical: 8,
     borderRadius: 8,
   },
   dropdownText: {
-    color: '#ddd',
+    color: "#ddd",
     fontSize: 20,
   },
   dropdownMenu: {
-    position: 'absolute',
+    position: "absolute",
     top: 45,
     right: 0,
-    backgroundColor: '#1e1e1e',
+    backgroundColor: "#1e1e1e",
     borderRadius: 8,
     width: 170,
     paddingVertical: 6,
@@ -370,54 +370,54 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   dropdownItemText: {
-    color: '#eee',
+    color: "#eee",
     fontSize: 16,
   },
   headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginBottom: 15,
   },
   rightControls: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 24,
   },
   exportButton: {
-    backgroundColor: '#2563eb',
-    flexDirection: 'row',
-    alignItems: 'center',
+    backgroundColor: "#2563eb",
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 8,
   },
   exportText: {
-    color: '#fff',
+    color: "#fff",
     marginLeft: 6,
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   paginationContainer: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginTop: 10,
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingBottom: 40,
   },
   paginationText: {
-    color: '#aaa',
+    color: "#aaa",
     fontSize: 20,
-    textAlign: 'center',
+    textAlign: "center",
   },
   paginationButtons: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
     columnGap: 10,
   },
   pageButton: {
-    backgroundColor: '#2a2a2a',
+    backgroundColor: "#2a2a2a",
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 6,
@@ -426,19 +426,19 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   pageButtonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 20,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   pageIndicator: {
-    backgroundColor: '#1e1e1e',
+    backgroundColor: "#1e1e1e",
     paddingHorizontal: 14,
     paddingVertical: 8,
     borderRadius: 6,
   },
   pageNumber: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 20,
-    fontWeight: '600',
+    fontWeight: "600",
   },
 });

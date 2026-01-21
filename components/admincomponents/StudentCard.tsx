@@ -1,12 +1,12 @@
-import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import { useState } from "react";
 import {
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
   View,
-} from 'react-native';
+} from "react-native";
 
 interface StudentBook {
   name: string;
@@ -60,7 +60,7 @@ export default function StudentCard({
           style={styles.expandButton}
         >
           <Ionicons
-            name={expanded ? 'chevron-up' : 'chevron-down'}
+            name={expanded ? "chevron-up" : "chevron-down"}
             size={24}
             color="#fff"
           />
@@ -103,64 +103,64 @@ export default function StudentCard({
 
 const styles = StyleSheet.create({
   studentCard: {
-    backgroundColor: '#1e1e1e',
+    backgroundColor: "#1e1e1e",
     borderRadius: 12,
     padding: 16,
     marginTop: 20,
   },
   cardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 10,
   },
   avatar: {
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: '#2563eb',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#2563eb",
+    alignItems: "center",
+    justifyContent: "center",
   },
   avatarText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   studentName: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 22,
-    fontWeight: 'bold',
+    fontWeight: "bold",
   },
   avgContainer: {
-    alignItems: 'flex-end',
+    alignItems: "flex-end",
     marginRight: 10,
   },
   avgText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
     marginBottom: 4,
   },
   avgBarBackground: {
     width: 70,
     height: 10,
-    backgroundColor: '#333',
+    backgroundColor: "#333",
     borderRadius: 5,
   },
   avgBarFill: {
     height: 10,
-    backgroundColor: '#22c55e',
+    backgroundColor: "#22c55e",
     borderRadius: 5,
   },
   viewBtn: {
-    backgroundColor: '#333',
+    backgroundColor: "#333",
     paddingHorizontal: 10,
     paddingVertical: 6,
     borderRadius: 5,
   },
   viewText: {
-    color: '#C9CCD1FF',
+    color: "#C9CCD1FF",
     fontSize: 20,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   expandButton: {
     paddingHorizontal: 8,
@@ -168,26 +168,26 @@ const styles = StyleSheet.create({
 
   scrollContainer: {
     marginTop: 12,
-    height: 180,
-    overflow: 'hidden',
+    height: 150,
+    overflow: "hidden",
   },
   row: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
   },
   bookName: {
     fontSize: 20,
-    fontWeight: '500',
-    color: '#fff',
+    fontWeight: "500",
+    color: "#fff",
   },
   bookPercent: {
     fontSize: 20,
-    fontWeight: '500',
-    color: '#fff',
+    fontWeight: "500",
+    color: "#fff",
   },
   progressTrack: {
-    width: '100%',
-    backgroundColor: '#fff',
+    width: "100%",
+    backgroundColor: "#fff",
     height: 10,
     borderRadius: 10,
     marginTop: 4,
