@@ -1,27 +1,18 @@
-import { Ionicons } from '@expo/vector-icons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useEffect, useState } from 'react';
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from 'react-native';
+import RepositorySection from "@/components/admincomponents/RepositorySection";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useEffect, useState } from "react";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import {
   ALERT_TYPE,
   AlertNotificationRoot,
   Dialog,
-} from 'react-native-alert-notification';
-import { Dropdown } from 'react-native-element-dropdown';
+} from "react-native-alert-notification";
 import {
   addRepository,
   DeleteRepository,
   repositoryOverview,
   UpdateRepository,
-} from '../api/adminapi/adminDashboard';
+} from "../api/adminapi/adminDashboard";
 
 export default function Repository() {
   const [repositoryData, setRepositoryData] = useState<{
@@ -29,11 +20,12 @@ export default function Repository() {
     resource?: any[];
     language?: any[];
     level?: any[];
+    book?: any[];
     subject?: any[];
   }>({});
   const [inputValues, setInputValues] = useState<{ [key: string]: string }>({});
   const [selectedValues, setSelectedValues] = useState<{ [key: string]: any }>(
-    {}
+    {},
   );
   const [editData, setEditData] = useState<{
     type?: string;
@@ -56,17 +48,17 @@ export default function Repository() {
       } else {
         Dialog.show({
           type: ALERT_TYPE.DANGER,
-          title: 'Login Failed',
-          textBody: response.message || 'Unexpected API format.',
-          button: 'Try Again',
+          title: "Login Failed",
+          textBody: response.message || "Unexpected API format.",
+          button: "Try Again",
         });
       }
     } catch (error: any) {
       Dialog.show({
         type: ALERT_TYPE.DANGER,
-        title: 'Login Failed',
-        textBody: error.message || 'Error fetching repository data.',
-        button: 'Try Again',
+        title: "Login Failed",
+        textBody: error.message || "Error fetching repository data.",
+        button: "Try Again",
       });
     }
   };
@@ -88,14 +80,14 @@ export default function Repository() {
     if (!newValue) {
       Dialog.show({
         type: ALERT_TYPE.DANGER,
-        title: 'Missing Fields',
+        title: "Missing Fields",
         textBody: `Input Required , Please enter a value for ${type}`,
-        button: 'Close',
+        button: "Close",
       });
       return;
     }
 
-    const token = await AsyncStorage.getItem('token');
+    const token = await AsyncStorage.getItem("token");
 
     const response = await addRepository({
       type: type,
@@ -106,20 +98,20 @@ export default function Repository() {
     if (response.success) {
       Dialog.show({
         type: ALERT_TYPE.SUCCESS,
-        title: 'Success',
-        textBody: 'Repository updated!',
-        button: 'OK',
+        title: "Success",
+        textBody: "Repository updated!",
+        button: "OK",
         onHide: async () => {
           await fetchRepository();
-          setInputValues((prev) => ({ ...prev, [type]: '' }));
+          setInputValues((prev) => ({ ...prev, [type]: "" }));
         },
       });
     } else {
       Dialog.show({
         type: ALERT_TYPE.DANGER,
-        title: 'Error',
-        textBody: response.message || 'Something went wrong',
-        button: 'Try Again',
+        title: "Error",
+        textBody: response.message || "Something went wrong",
+        button: "Try Again",
       });
     }
   };
@@ -130,13 +122,13 @@ export default function Repository() {
     if (!updatedValue || !editData.id) {
       Dialog.show({
         type: ALERT_TYPE.DANGER,
-        title: 'Missing Fields',
-        textBody: 'Please enter value before updating.',
-        button: 'Close',
+        title: "Missing Fields",
+        textBody: "Please enter value before updating.",
+        button: "Close",
       });
       return;
     }
-    const token = await AsyncStorage.getItem('token');
+    const token = await AsyncStorage.getItem("token");
     const response = await UpdateRepository({
       updateId: editData.id,
       value: updatedValue,
@@ -146,155 +138,180 @@ export default function Repository() {
     if (response.success) {
       Dialog.show({
         type: ALERT_TYPE.SUCCESS,
-        title: 'Updated',
-        textBody: 'Updated Successfully!',
-        button: 'OK',
+        title: "Updated",
+        textBody: "Updated Successfully!",
+        button: "OK",
         onHide: async () => {
           await fetchRepository();
-          setInputValues((prev) => ({ ...prev, [type]: '' }));
+          setInputValues((prev) => ({ ...prev, [type]: "" }));
           setEditData({});
         },
       });
     }
   };
 
-  const handleDelete = async (repoId: Number) => {
+  const handleDelete = async (repoId: number) => {
     Dialog.show({
       type: ALERT_TYPE.WARNING,
-      title: 'Confirm Delete',
-      textBody: 'Are you sure you want to delete this item?',
-      button: 'Delete',
+      title: "Confirm Delete",
+      textBody: "Are you sure you want to delete this item?",
+      button: "Delete",
       onHide: async () => {
-        const token = await AsyncStorage.getItem('token');
+        const token = await AsyncStorage.getItem("token");
         const response = await DeleteRepository(repoId, token);
 
         if (response.success) {
           Dialog.show({
             type: ALERT_TYPE.SUCCESS,
-            title: 'Deleted',
-            textBody: 'Repository item deleted successfully!',
-            button: 'OK',
+            title: "Deleted",
+            textBody: "Repository item deleted successfully!",
+            button: "OK",
             onHide: fetchRepository,
           });
         } else {
           Dialog.show({
             type: ALERT_TYPE.DANGER,
-            title: 'Error',
-            textBody: response.message || 'Delete failed.',
-            button: 'Close',
+            title: "Error",
+            textBody: response.message || "Delete failed.",
+            button: "Close",
           });
         }
       },
     });
   };
 
-  const GradientBox = ({ children }: any) => (
-    <LinearGradient
-      colors={['#8B4DFF', '#5B2BE3']}
-      style={styles.gradientDropdown}
-    >
-      {children}
-    </LinearGradient>
-  );
-
-  const renderSection = (title: string, items: any[]) => {
-    if (!items) return null;
-
-    return (
-      <View key={title} style={styles.sectionWrapper}>
-        <Text style={styles.label}>{title}</Text>
-        <GradientBox>
-          <Dropdown
-            style={styles.dropdown}
-            placeholderStyle={styles.placeholderStyle}
-            selectedTextStyle={styles.selectedTextStyle}
-            data={items}
-            labelField="label"
-            valueField="value"
-            placeholder={`Select ${title}`}
-            renderRightIcon={() => (
-              <Ionicons name="chevron-down" size={28} color="#fff" />
-            )}
-            value={selectedValues[title] || null}
-            onChange={(item) => {
-              setSelectedValues((prev) => ({
-                ...prev,
-                [title]: item.value,
-              }));
-            }}
-            renderItem={(item) => (
-              <View style={styles.dropdownItem}>
-                <Text style={styles.dropdownItemText}>{item.label}</Text>
-                <View style={{ flexDirection: 'row' }}>
-                  <TouchableOpacity
-                    style={styles.iconBtn}
-                    onPress={() => {
-                      setInputValues((prev) => ({
-                        ...prev,
-                        [title]: item.label,
-                      }));
-
-                      setEditData({
-                        type: title,
-                        id: item.value,
-                      });
-                    }}
-                  >
-                    <Ionicons name="create-outline" size={20} color="#FFD700" />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={styles.iconBtn}
-                    onPress={() => handleDelete(item.value)}
-                  >
-                    <Ionicons name="trash-outline" size={20} color="#FF4C4C" />
-                  </TouchableOpacity>
-                </View>
-              </View>
-            )}
-          />
-        </GradientBox>
-        <View style={{ padding: 10, backgroundColor: '#1B1B28' }}>
-          <View style={styles.inputRow}>
-            <TextInput
-              placeholder={`Add new ${title}`}
-              placeholderTextColor="#999"
-              style={styles.input}
-              value={inputValues[title] || ''}
-              onChangeText={(text) => handleInputChange(title, text)}
-            />
-            <TouchableOpacity
-              style={styles.addButton}
-              onPress={() =>
-                editData.type === title ? handleUpdate(title) : handleAdd(title)
-              }
-            >
-              <Text style={styles.addButtonText}>
-                {editData.type === title ? 'Update' : 'Add'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </View>
-    );
-  };
-
+  // eslint-disable-next-line no-unused-expressions
+  <RepositorySection
+    title="category"
+    items={repositoryData.category || []}
+    selectedValue={selectedValues["category"]}
+    inputValue={inputValues["category"] || ""}
+    editData={editData}
+    onSelect={(value) =>
+      setSelectedValues((prev) => ({ ...prev, category: value }))
+    }
+    onInputChange={(text) => handleInputChange("category", text)}
+    onAdd={() => handleAdd("category")}
+    onUpdate={() => handleUpdate("category")}
+    onEdit={(label, id) => {
+      setInputValues((prev) => ({ ...prev, category: label }));
+      setEditData({ type: "category", id });
+    }}
+    onDelete={(id) => handleDelete(id)}
+  />;
   return (
     <AlertNotificationRoot>
       <View style={styles.container}>
         <ScrollView style={styles.mainContent}>
           <Text style={styles.sectionTitle}>Create Repository</Text>
-
-          {renderSection('category', repositoryData.category || [])}
-
-          {selectedValues['category'] &&
-            renderSection('level', repositoryData.level || [])}
-
-          {selectedValues['level'] &&
-            renderSection('subject', repositoryData.subject || [])}
-
-          {renderSection('resource', repositoryData.resource || [])}
-
-          {renderSection('language', repositoryData.language || [])}
+          <RepositorySection
+            title="category"
+            items={repositoryData.category || []}
+            selectedValue={selectedValues["category"]}
+            inputValue={inputValues["category"] || ""}
+            editData={editData}
+            onSelect={(value) =>
+              setSelectedValues((prev) => ({ ...prev, category: value }))
+            }
+            onInputChange={(text) => handleInputChange("category", text)}
+            onAdd={() => handleAdd("category")}
+            onUpdate={() => handleUpdate("category")}
+            onEdit={(label, id) => {
+              setInputValues((prev) => ({ ...prev, category: label }));
+              setEditData({ type: "category", id });
+            }}
+            onDelete={(id) => handleDelete(id)}
+          />
+          <RepositorySection
+            title="level"
+            items={repositoryData.level || []}
+            selectedValue={selectedValues["level"]}
+            inputValue={inputValues["level"] || ""}
+            editData={editData}
+            onSelect={(value) =>
+              setSelectedValues((prev) => ({ ...prev, level: value }))
+            }
+            onInputChange={(text) => handleInputChange("level", text)}
+            onAdd={() => handleAdd("level")}
+            onUpdate={() => handleUpdate("level")}
+            onEdit={(label, id) => {
+              setInputValues((prev) => ({ ...prev, level: label }));
+              setEditData({ type: "level", id });
+            }}
+            onDelete={(id) => handleDelete(id)}
+          />
+          <RepositorySection
+            title="subject"
+            items={repositoryData.subject || []}
+            selectedValue={selectedValues["subject"]}
+            inputValue={inputValues["subject"] || ""}
+            editData={editData}
+            onSelect={(value) =>
+              setSelectedValues((prev) => ({ ...prev, subject: value }))
+            }
+            onInputChange={(text) => handleInputChange("subject", text)}
+            onAdd={() => handleAdd("subject")}
+            onUpdate={() => handleUpdate("subject")}
+            onEdit={(label, id) => {
+              setInputValues((prev) => ({ ...prev, subject: label }));
+              setEditData({ type: "subject", id });
+            }}
+            onDelete={(id) => handleDelete(id)}
+          />
+          <RepositorySection
+            title="book"
+            items={repositoryData.book || []}
+            selectedValue={selectedValues["book"]}
+            inputValue={inputValues["book"] || ""}
+            editData={editData}
+            onSelect={(value) =>
+              setSelectedValues((prev) => ({ ...prev, book: value }))
+            }
+            onInputChange={(text) => handleInputChange("book", text)}
+            onAdd={() => handleAdd("book")}
+            onUpdate={() => handleUpdate("book")}
+            onEdit={(label, id) => {
+              setInputValues((prev) => ({ ...prev, book: label }));
+              setEditData({ type: "book", id });
+            }}
+            onDelete={(id) => handleDelete(id)}
+          />
+          <RepositorySection
+            title="language"
+            items={repositoryData.language || []}
+            selectedValue={selectedValues["language"]}
+            inputValue={inputValues["language"] || ""}
+            editData={editData}
+            onSelect={(value) =>
+              setSelectedValues((prev) => ({ ...prev, language: value }))
+            }
+            onInputChange={(text) => handleInputChange("language", text)}
+            onAdd={() => handleAdd("language")}
+            onUpdate={() => handleUpdate("language")}
+            onEdit={(label, id) => {
+              setInputValues((prev) => ({ ...prev, language: label }));
+              setEditData({ type: "language", id });
+            }}
+            onDelete={(id) => handleDelete(id)}
+          />
+          <RepositorySection
+            title="resource"
+            items={repositoryData.resource || []}
+            selectedValue={selectedValues["resource"]}
+            inputValue={inputValues["resource"] || ""}
+            editData={editData}
+            onSelect={(value) =>
+              setSelectedValues((prev) => ({ ...prev, resource: value }))
+            }
+            onInputChange={(text) => handleInputChange("resource", text)}
+            onAdd={() => handleAdd("resource")}
+            onUpdate={() => handleUpdate("resource")}
+            onEdit={(label, id) => {
+              setInputValues((prev) => ({ ...prev, resource: label }));
+              setEditData({ type: "resource", id });
+            }}
+            onDelete={(id) => handleDelete(id)}
+          />
         </ScrollView>
       </View>
     </AlertNotificationRoot>
@@ -304,81 +321,15 @@ export default function Repository() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#121212',
+    backgroundColor: "#121212",
   },
   mainContent: {
     padding: 20,
   },
   sectionTitle: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 28,
     marginTop: 10,
     marginBottom: 20,
-  },
-  sectionWrapper: {
-    marginBottom: 22,
-  },
-  label: {
-    color: '#fff',
-    fontSize: 18,
-    marginBottom: 8,
-    fontWeight: '600',
-  },
-  gradientDropdown: {
-    borderRadius: 12,
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-  },
-  dropdown: {
-    height: 45,
-  },
-  placeholderStyle: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  selectedTextStyle: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  dropdownItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    backgroundColor: '#1B1B28',
-    borderBottomWidth: 1,
-    borderBottomColor: '#333',
-  },
-  dropdownItemText: {
-    color: '#fff',
-    fontSize: 16,
-  },
-  iconBtn: {
-    marginLeft: 10,
-    padding: 4,
-  },
-  inputRow: {
-    flexDirection: 'row',
-    marginTop: 10,
-  },
-  input: {
-    flex: 1,
-    backgroundColor: '#1F1F2E',
-    borderRadius: 8,
-    paddingHorizontal: 10,
-    color: '#fff',
-    fontSize: 16,
-  },
-  addButton: {
-    backgroundColor: '#0fba17',
-    paddingHorizontal: 14,
-    justifyContent: 'center',
-    marginLeft: 6,
-    borderRadius: 8,
-  },
-  addButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
   },
 });
