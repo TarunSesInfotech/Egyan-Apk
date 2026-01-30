@@ -2,11 +2,11 @@
 export const AdminStats = async () => {
   try {
     const response = await fetch(
-      'https://e-gyan-9tky.onrender.com/admin/stats',
+      "https://e-gyan-9tky.onrender.com/admin/stats",
       {
-        method: 'GET',
-        headers: { 'Content-Type': 'application/json' },
-      }
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      },
     );
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -14,30 +14,7 @@ export const AdminStats = async () => {
     const data = await response.json();
     return { success: true, data };
   } catch (error) {
-    console.error('Error fetching AdminStats:', error.message);
-    return { success: false, message: error.message };
-  }
-};
-
-//school overview
-export const schoolOverview = async () => {
-  try {
-    const response = await fetch(
-      'https://e-gyan-9tky.onrender.com/admin/school-overview',
-      {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const data = await response.json();
-    return { success: true, data };
-  } catch (error) {
-    console.error('Error fetching SchoolOverview:', error.message);
+    console.error("Error fetching AdminStats:", error.message);
     return { success: false, message: error.message };
   }
 };
@@ -46,13 +23,13 @@ export const schoolOverview = async () => {
 export const repositoryOverview = async () => {
   try {
     const response = await fetch(
-      'https://e-gyan-9tky.onrender.com/repository',
+      "https://e-gyan-9tky.onrender.com/repository",
       {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-      }
+      },
     );
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -60,61 +37,62 @@ export const repositoryOverview = async () => {
     const data = await response.json();
     return { success: true, data };
   } catch (error) {
-    console.error('Error fetching repositoryOverview:', error.message);
+    console.error("Error fetching repositoryOverview:", error.message);
     return { success: false, message: error.message };
   }
 };
 
 export const addRepository = async ({ type, text, token }) => {
   if (!token) {
-    return { success: false, message: 'Access token missing!' };
+    return { success: false, message: "Access token missing!" };
   }
   try {
     const bodyData = { type, text };
     const response = await fetch(
-      'https://e-gyan-9tky.onrender.com/repository',
+      "https://e-gyan-9tky.onrender.com/repository",
       {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(bodyData),
-      }
+      },
     );
     if (!response.ok) {
+      // eslint-disable-next-line no-undef
       return { success: false, message: raw };
     }
     return { success: true, data: await response.json() };
   } catch (err) {
-    console.error('❌ Add Repository Error:', err);
+    console.error("❌ Add Repository Error:", err);
     return { success: false, message: err.message };
   }
 };
 
 export const UpdateRepository = async ({ updateId, value, token }) => {
   if (!token) {
-    return { success: false, message: 'Access token missing!' };
+    return { success: false, message: "Access token missing!" };
   }
   try {
     const bodyData = { value };
     const response = await fetch(
       `https://e-gyan-9tky.onrender.com/repository/${updateId}`,
       {
-        method: 'PATCH',
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(bodyData),
-      }
+      },
     );
     if (!response.ok) {
       return { success: false, message: await response.text() };
     }
     return { success: true, data: await response.json() };
   } catch (err) {
-    console.error('❌ Add Repository Error:', err);
+    console.error("❌ Add Repository Error:", err);
     return { success: false, message: err.message };
   }
 };
@@ -125,12 +103,12 @@ export const DeleteRepository = async (repoId, token) => {
     const response = await fetch(
       `https://e-gyan-9tky.onrender.com/repository/${repoId}`,
       {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
 
     if (!response.ok) {
@@ -150,13 +128,13 @@ export const updateUserRole = async (repoId, token, role, isActive) => {
     const response = await fetch(
       `https://e-gyan-9tky.onrender.com/user/update-role/${repoId}`,
       {
-        method: 'PATCH',
+        method: "PATCH",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(bodyData),
-      }
+      },
     );
 
     if (!response.ok) {
@@ -173,10 +151,10 @@ export const updateUserRole = async (repoId, token, role, isActive) => {
 // Role management Api
 export const userRoleOverview = async () => {
   try {
-    const response = await fetch('https://e-gyan-9tky.onrender.com/user', {
-      method: 'GET',
+    const response = await fetch("https://e-gyan-9tky.onrender.com/user", {
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
     });
     if (!response.ok) {
@@ -185,7 +163,7 @@ export const userRoleOverview = async () => {
     const data = await response.json();
     return { success: true, data };
   } catch (error) {
-    console.error('Error fetching UserRole Overview:', error.message);
+    console.error("Error fetching UserRole Overview:", error.message);
     return { success: false, message: error.message };
   }
 };
@@ -196,12 +174,12 @@ export const userRoleDeleteApi = async (token, userId) => {
     const response = await fetch(
       `https://e-gyan-9tky.onrender.com/user/delete-role/${userId}`,
       {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-      }
+      },
     );
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -209,7 +187,7 @@ export const userRoleDeleteApi = async (token, userId) => {
     const data = await response.json();
     return { success: true, data };
   } catch (error) {
-    console.error('Error fetching UserRole Overview:', error.message);
+    console.error("Error fetching UserRole Overview:", error.message);
     return { success: false, message: error.message };
   }
 };
@@ -220,11 +198,11 @@ export const getInnerChapterDeleteApi = async (bookId) => {
     const response = await fetch(
       `https://e-gyan-9tky.onrender.com/books/chapter/${bookId}`,
       {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-      }
+      },
     );
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -232,7 +210,7 @@ export const getInnerChapterDeleteApi = async (bookId) => {
     const data = await response.json();
     return { success: true, data };
   } catch (error) {
-    console.error('Error fetching chapters:', error.message);
+    console.error("Error fetching chapters:", error.message);
     return { success: false, message: error.message };
   }
 };
@@ -242,13 +220,13 @@ export const getInnerChapterDeleteApi = async (bookId) => {
 export const userStudentProgress = async () => {
   try {
     const response = await fetch(
-      'https://e-gyan-9tky.onrender.com/admin/student-progress',
+      "https://e-gyan-9tky.onrender.com/admin/student-progress",
       {
-        method: 'GET',
+        method: "GET",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-      }
+      },
     );
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
@@ -256,7 +234,7 @@ export const userStudentProgress = async () => {
     const data = await response.json();
     return { success: true, data };
   } catch (error) {
-    console.error('Error fetching UserRole Overview:', error.message);
+    console.error("Error fetching UserRole Overview:", error.message);
     return { success: false, message: error.message };
   }
 };

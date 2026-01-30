@@ -35,6 +35,7 @@ export default function Repository() {
   const fetchRepository = async () => {
     try {
       const response = await repositoryOverview();
+      console.log("response :>> ", response);
       if (response.success) {
         const grouped = response.data.reduce((acc: any, item: any) => {
           if (!acc[item.type]) acc[item.type] = [];
