@@ -1,11 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import {
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { Dropdown } from "react-native-element-dropdown";
 
@@ -58,7 +58,7 @@ export default function RepositorySection({
           renderRightIcon={() => (
             <Ionicons name="chevron-down" size={28} color="#fff" />
           )}
-          onChange={(item) => onSelect(item.value)}
+          onChange={(item) => onSelect(item.label)}
           renderItem={(item) => (
             <View style={styles.dropdownItem}>
               <Text style={styles.dropdownItemText}>{item.label}</Text>

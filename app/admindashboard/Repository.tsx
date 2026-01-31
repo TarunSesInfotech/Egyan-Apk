@@ -1,3 +1,9 @@
+import {
+  addRepository,
+  DeleteRepository,
+  fetchRepositoryByType,
+  UpdateRepository,
+} from "@/app/api/adminapi/adminrepositry";
 import RepositorySection from "@/components/admincomponents/RepositorySection";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
@@ -7,12 +13,6 @@ import {
   AlertNotificationRoot,
   Dialog,
 } from "react-native-alert-notification";
-import {
-  addRepository,
-  DeleteRepository,
-  repositoryOverview,
-  UpdateRepository,
-} from "../api/adminapi/adminDashboard";
 
 export default function Repository() {
   const [repositoryData, setRepositoryData] = useState<{
@@ -32,32 +32,63 @@ export default function Repository() {
     id?: number | null;
   }>({});
 
+  const fetchLevelByCategory = async (categoryLabel: string) => {
+    try {
+      const levelRes = await fetchRepositoryByType("level", categoryLabel);
+
+      if (!levelRes?.success || !Array.isArray(levelRes.data)) {
+        setRepositoryData((prev) => ({ ...prev, level: [] }));
+        return;
+      }
+
+      setRepositoryData((prev) => ({
+        ...prev,
+        level: levelRes.data.map((item: any) => ({
+          label: item.text,
+          value: item.id,
+          category: item.category,
+        })),
+      }));
+    } catch {
+      setRepositoryData((prev) => ({ ...prev, level: [] }));
+    }
+  };
+
   const fetchRepository = async () => {
     try {
-      const response = await repositoryOverview();
-      console.log("response :>> ", response);
-      if (response.success) {
-        const grouped = response.data.reduce((acc: any, item: any) => {
-          if (!acc[item.type]) acc[item.type] = [];
-          acc[item.type].push({
+      const [category, resource, language] = await Promise.all([
+        fetchRepositoryByType("category"),
+        fetchRepositoryByType("resource"),
+        fetchRepositoryByType("language"),
+      ]);
+      if (resource.success && language.success) {
+        setRepositoryData((prev) => ({
+          ...prev,
+          category: category.data.map((item: any) => ({
             label: item.text,
             value: item.id,
-          });
-          return acc;
-        }, {});
-        setRepositoryData(grouped);
+          })),
+          resource: resource.data.map((item: any) => ({
+            label: item.text,
+            value: item.id,
+          })),
+          language: language.data.map((item: any) => ({
+            label: item.text,
+            value: item.id,
+          })),
+        }));
       } else {
         Dialog.show({
           type: ALERT_TYPE.DANGER,
-          title: "Login Failed",
-          textBody: response.message || "Unexpected API format.",
+          title: "Error",
+          textBody: "Unexpected API format.",
           button: "Try Again",
         });
       }
     } catch (error: any) {
       Dialog.show({
         type: ALERT_TYPE.DANGER,
-        title: "Login Failed",
+        title: "Error",
         textBody: error.message || "Error fetching repository data.",
         button: "Try Again",
       });
@@ -180,40 +211,27 @@ export default function Repository() {
       },
     });
   };
-
-  // eslint-disable-next-line no-unused-expressions
-  <RepositorySection
-    title="category"
-    items={repositoryData.category || []}
-    selectedValue={selectedValues["category"]}
-    inputValue={inputValues["category"] || ""}
-    editData={editData}
-    onSelect={(value) =>
-      setSelectedValues((prev) => ({ ...prev, category: value }))
-    }
-    onInputChange={(text) => handleInputChange("category", text)}
-    onAdd={() => handleAdd("category")}
-    onUpdate={() => handleUpdate("category")}
-    onEdit={(label, id) => {
-      setInputValues((prev) => ({ ...prev, category: label }));
-      setEditData({ type: "category", id });
-    }}
-    onDelete={(id) => handleDelete(id)}
-  />;
   return (
     <AlertNotificationRoot>
       <View style={styles.container}>
         <ScrollView style={styles.mainContent}>
           <Text style={styles.sectionTitle}>Create Repository</Text>
           <RepositorySection
-            title="category"
+            title="Category"
             items={repositoryData.category || []}
             selectedValue={selectedValues["category"]}
             inputValue={inputValues["category"] || ""}
             editData={editData}
-            onSelect={(value) =>
-              setSelectedValues((prev) => ({ ...prev, category: value }))
-            }
+            onSelect={(label) => {
+              setSelectedValues((prev) => ({
+                ...prev,
+                category: repositoryData.category?.find(
+                  (c) => c.label === label,
+                )?.value,
+              }));
+
+              fetchLevelByCategory(label);
+            }}
             onInputChange={(text) => handleInputChange("category", text)}
             onAdd={() => handleAdd("category")}
             onUpdate={() => handleUpdate("category")}
@@ -223,8 +241,9 @@ export default function Repository() {
             }}
             onDelete={(id) => handleDelete(id)}
           />
+
           <RepositorySection
-            title="level"
+            title="Education Level"
             items={repositoryData.level || []}
             selectedValue={selectedValues["level"]}
             inputValue={inputValues["level"] || ""}
@@ -242,7 +261,7 @@ export default function Repository() {
             onDelete={(id) => handleDelete(id)}
           />
           <RepositorySection
-            title="subject"
+            title="Subject"
             items={repositoryData.subject || []}
             selectedValue={selectedValues["subject"]}
             inputValue={inputValues["subject"] || ""}
@@ -260,7 +279,7 @@ export default function Repository() {
             onDelete={(id) => handleDelete(id)}
           />
           <RepositorySection
-            title="book"
+            title="Books"
             items={repositoryData.book || []}
             selectedValue={selectedValues["book"]}
             inputValue={inputValues["book"] || ""}
@@ -278,7 +297,7 @@ export default function Repository() {
             onDelete={(id) => handleDelete(id)}
           />
           <RepositorySection
-            title="language"
+            title="Language"
             items={repositoryData.language || []}
             selectedValue={selectedValues["language"]}
             inputValue={inputValues["language"] || ""}
@@ -296,7 +315,7 @@ export default function Repository() {
             onDelete={(id) => handleDelete(id)}
           />
           <RepositorySection
-            title="resource"
+            title="Resource"
             items={repositoryData.resource || []}
             selectedValue={selectedValues["resource"]}
             inputValue={inputValues["resource"] || ""}
