@@ -1,6 +1,7 @@
 import {
   addRepository,
   DeleteRepository,
+  fetchBookBy,
   fetchRepositoryByType,
   fetchSubjectsByClass,
   UpdateRepository,
@@ -115,6 +116,52 @@ export default function Repository() {
       setRepositoryData((prev) => ({ ...prev, subject: [] }));
     }
   };
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const fetchBooksByFilters = async () => {
+    const categoryLabel = repositoryData.category?.find(
+      (c) => c.value === selectedValues.category,
+    )?.label;
+
+    const levelLabel = repositoryData.level?.find(
+      (l) => l.value === selectedValues.level,
+    )?.label;
+
+    const subjectLabel = repositoryData.subject?.find(
+      (s) => s.value === selectedValues.subject,
+    )?.label;
+
+    if (!categoryLabel || !levelLabel || !subjectLabel) return;
+
+    const result = await fetchBookBy(levelLabel, subjectLabel, categoryLabel);
+
+    if (result.success && Array.isArray(result.data)) {
+      setRepositoryData((prev) => ({
+        ...prev,
+        book: result.data.map((item: any) => ({
+          label: item.bookName,
+          value: item.id,
+        })),
+      }));
+    } else {
+      setRepositoryData((prev) => ({ ...prev, book: [] }));
+    }
+  };
+
+  useEffect(() => {
+    if (
+      selectedValues.category &&
+      selectedValues.level &&
+      selectedValues.subject
+    ) {
+      fetchBooksByFilters();
+    }
+  }, [
+    fetchBooksByFilters,
+    selectedValues.category,
+    selectedValues.level,
+    selectedValues.subject,
+  ]);
 
   const handleInputChange = (sectionKey: string, value: string) => {
     setInputValues((prev) => ({
@@ -325,9 +372,17 @@ export default function Repository() {
             selectedValue={selectedValues["book"]}
             inputValue={inputValues["book"] || ""}
             editData={editData}
-            onSelect={(value) =>
-              setSelectedValues((prev) => ({ ...prev, book: value }))
-            }
+            onSelect={(label) => {
+              const selectedItem = repositoryData.book?.find(
+                (b) => b.label === label,
+              );
+              if (selectedItem) {
+                setSelectedValues((prev) => ({
+                  ...prev,
+                  book: selectedItem.value,
+                }));
+              }
+            }}
             onInputChange={(text) => handleInputChange("book", text)}
             onAdd={() => handleAdd("book")}
             onUpdate={() => handleUpdate("book")}

@@ -25,7 +25,7 @@ export const fetchRepositoryByType = async (type, category) => {
     return { success: false, message: error.message };
   }
 };
-
+//Repository overview
 export const fetchSubjectsByClass = async (selectedClass) => {
   try {
     const url = `https://e-gyan-9tky.onrender.com/books/subject?class=${encodeURIComponent(selectedClass)}`;
@@ -49,6 +49,30 @@ export const fetchSubjectsByClass = async (selectedClass) => {
   }
 };
 
+export const fetchBookBy = async (selectedClass, selectedSubject, category) => {
+  try {
+    const url = `https://e-gyan-9tky.onrender.com/books?class=${encodeURIComponent(selectedClass)}&subject=${encodeURIComponent(selectedSubject)}&category=${encodeURIComponent(category)}`;
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return { success: true, data };
+  } catch (error) {
+    console.error("Error fetching subjects:", error.message);
+    return { success: false, message: error.message };
+  }
+};
+
+// Add repositry
 export const addRepository = async ({ type, text, token }) => {
   if (!token) {
     return { success: false, message: "Access token missing!" };
