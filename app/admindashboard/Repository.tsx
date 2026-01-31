@@ -2,6 +2,7 @@ import {
   addRepository,
   DeleteRepository,
   fetchRepositoryByType,
+  fetchSubjectsByClass,
   UpdateRepository,
 } from "@/app/api/adminapi/adminrepositry";
 import RepositorySection from "@/components/admincomponents/RepositorySection";
@@ -98,6 +99,22 @@ export default function Repository() {
   useEffect(() => {
     fetchRepository();
   }, []);
+
+  const handleLevelSelect = async (levelLabel: string) => {
+    const result = await fetchSubjectsByClass(levelLabel);
+
+    if (result.success && Array.isArray(result.data)) {
+      setRepositoryData((prev) => ({
+        ...prev,
+        subject: result.data.map((item: string) => ({
+          label: item,
+          value: item,
+        })),
+      }));
+    } else {
+      setRepositoryData((prev) => ({ ...prev, subject: [] }));
+    }
+  };
 
   const handleInputChange = (sectionKey: string, value: string) => {
     setInputValues((prev) => ({
@@ -223,14 +240,18 @@ export default function Repository() {
             inputValue={inputValues["category"] || ""}
             editData={editData}
             onSelect={(label) => {
-              setSelectedValues((prev) => ({
-                ...prev,
-                category: repositoryData.category?.find(
-                  (c) => c.label === label,
-                )?.value,
-              }));
+              const selectedItem = repositoryData.category?.find(
+                (c) => c.label === label,
+              );
 
-              fetchLevelByCategory(label);
+              if (selectedItem) {
+                setSelectedValues((prev) => ({
+                  ...prev,
+                  category: selectedItem.value,
+                }));
+
+                fetchLevelByCategory(label);
+              }
             }}
             onInputChange={(text) => handleInputChange("category", text)}
             onAdd={() => handleAdd("category")}
@@ -248,9 +269,20 @@ export default function Repository() {
             selectedValue={selectedValues["level"]}
             inputValue={inputValues["level"] || ""}
             editData={editData}
-            onSelect={(value) =>
-              setSelectedValues((prev) => ({ ...prev, level: value }))
-            }
+            onSelect={(label) => {
+              const selectedItem = repositoryData.level?.find(
+                (l) => l.label === label,
+              );
+
+              if (selectedItem) {
+                setSelectedValues((prev) => ({
+                  ...prev,
+                  level: selectedItem.value,
+                }));
+
+                handleLevelSelect(selectedItem.label);
+              }
+            }}
             onInputChange={(text) => handleInputChange("level", text)}
             onAdd={() => handleAdd("level")}
             onUpdate={() => handleUpdate("level")}
@@ -266,9 +298,18 @@ export default function Repository() {
             selectedValue={selectedValues["subject"]}
             inputValue={inputValues["subject"] || ""}
             editData={editData}
-            onSelect={(value) =>
-              setSelectedValues((prev) => ({ ...prev, subject: value }))
-            }
+            onSelect={(label) => {
+              const selectedItem = repositoryData.subject?.find(
+                (s) => s.label === label,
+              );
+
+              if (selectedItem) {
+                setSelectedValues((prev) => ({
+                  ...prev,
+                  subject: selectedItem.value,
+                }));
+              }
+            }}
             onInputChange={(text) => handleInputChange("subject", text)}
             onAdd={() => handleAdd("subject")}
             onUpdate={() => handleUpdate("subject")}
