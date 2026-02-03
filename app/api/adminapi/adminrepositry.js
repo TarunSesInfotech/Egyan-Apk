@@ -1,4 +1,4 @@
-//Repository overview
+//Repository fetchRepositoryByType overview
 export const fetchRepositoryByType = async (type, category) => {
   try {
     let url = `https://e-gyan-9tky.onrender.com/repository?type=${type}`;
@@ -25,7 +25,8 @@ export const fetchRepositoryByType = async (type, category) => {
     return { success: false, message: error.message };
   }
 };
-//Repository overview
+
+//Repository fetchSubjectsByClass overview
 export const fetchSubjectsByClass = async (selectedClass) => {
   try {
     const url = `https://e-gyan-9tky.onrender.com/books/subject?class=${encodeURIComponent(selectedClass)}`;
@@ -48,7 +49,7 @@ export const fetchSubjectsByClass = async (selectedClass) => {
     return { success: false, message: error.message };
   }
 };
-
+//Repository fetchBookBy  overview
 export const fetchBookBy = async (selectedClass, selectedSubject, category) => {
   try {
     const url = `https://e-gyan-9tky.onrender.com/books?class=${encodeURIComponent(selectedClass)}&subject=${encodeURIComponent(selectedSubject)}&category=${encodeURIComponent(category)}`;
